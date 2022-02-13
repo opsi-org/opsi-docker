@@ -1,0 +1,83 @@
+version: '3.4'
+
+x-common-mysql-variables: &common-mysql-variables
+  MYSQL_DATABASE: opsi
+  MYSQL_USER: opsi
+  MYSQL_PASSWORD: eeC9ku3iejeiriSh
+
+x-common-redis-variables: &common-redis-variables
+  REDIS_PASSWORD: ideeT2aeliesh4oo
+
+x-common-grafana-variables: &common-grafana-variables
+  GF_SECURITY_ADMIN_USER: admin
+  GF_SECURITY_ADMIN_PASSWORD: shai6eeQuuQuuo0a
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  opsi_data:
+    driver: local
+services:
+  mysql:
+    image: mariadb:latest
+    command: --max_allowed_packet=256M --sort_buffer_size=4M
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - mysql_data:/var/lib/mysql
+    environment:
+       <<: *common-mysql-variables
+       MYSQL_ROOT_PASSWORD: oareaNg6Ooz4teik
+       MYSQL_INITDB_SKIP_TZINFO: 1
+
+  redis:
+    image: redislabs/redistimeseries:latest
+    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD --loadmodule /usr/lib/redis/modules/redistimeseries.so"
+    environment: *common-redis-variables
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - redis_data:/data
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      <<: *common-grafana-variables
+      GF_INSTALL_PLUGINS: grafana-simple-json-datasource
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+  opsiconfd:
+    depends_on:
+      - mysql
+      - redis
+    build:
+      context: opsiconfd
+      dockerfile: Dockerfile
+    ports:
+      - "4447:4447"
+    hostname: opsiconfd
+    domainname: opsi.org
+    environment:
+      <<: [*common-mysql-variables, *common-grafana-variables, *common-redis-variables]
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+      GRAFANA_HOST: grafana
+      # configserver / depotserver
+      OPSI_HOST_ROLE: configserver
+      OPSI_ADMIN_PASSWORD: juosiesah6Ie
+      # OPSI_SERVICE_ADDRESS and OPSI_HOST_KEY is needed for depotserver role only
+      OPSI_SERVICE_ADDRESS:
+      OPSI_HOST_KEY:
+      # opsconfd config
+      OPSICONFD_LOG_LEVEL: 5
+      OPSICONFD_LOG_LEVEL_STDERR: 3
+      OPSICONFD_LOG_LEVEL_FILE: 5
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - opsi_data:/data
+
