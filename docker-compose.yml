@@ -59,8 +59,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4447:4447"
-    hostname: opsiconfd
-    domainname: opsi.org
+    hostname: opsi
+    domainname: domain.tld
     environment:
       <<: [*common-mysql-variables, *common-grafana-variables, *common-redis-variables]
       MYSQL_HOST: mysql
@@ -73,6 +73,7 @@ services:
       OPSI_SERVICE_ADDRESS:
       OPSI_HOST_KEY:
       # opsconfd config
+      OPSICONFD_GRAFANA_EXTERNAL_URL: http://grafana.domain.tld:3000
       OPSICONFD_LOG_LEVEL: 5
       OPSICONFD_LOG_LEVEL_STDERR: 3
       OPSICONFD_LOG_LEVEL_FILE: 5
