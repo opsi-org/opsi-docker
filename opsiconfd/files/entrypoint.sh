@@ -63,30 +63,32 @@ function set_default_configs {
 
 function init_volumes {
 	echo "* Init volumes" 1>&2
-	for dir_to_move in "/etc/opsi:etc" "/var/lib/opsi:lib" "/var/log/opsi:log"; do
+	set return_val=0
+	for dir_to_move in "/etc/opsi:etc" "/var/lib/opsi:lib" "/var/log/opsi:log" "/tftpboot:tftpboot"; do
 		src=${dir_to_move%:*}
 		dst=${dir_to_move#*:}
+		dst="/data/${dst}"
 		if [ ! -L "${src}" ]; then
 			echo "Move ${src}" 1>&2
-			if [ -e "/data/${dst}" ]; then
+			set return_val=1
+			if [ -e "${dst}" ]; then
 				rm -r "${src}"
-				ln -s "/data/${dst}" "${src}"
+				ln -s "${dst}" "${src}"
 			else
-				mv "${src}" "/data/${dst}"
-				ln -s "/data/${dst}" "${src}"
-				opsi-set-rights "${src}"
+				mv "${src}" "${dst}"
+				ln -s "${dst}" "${src}"
+				chown opsiconfd:opsiadmin "${dst}"
+				chmod 770 "${dst}"
 			fi
 		fi
 	done
+	return $return_val
 }
 
 
 function setup_users {
 	echo "* Setup users" 1>&2
-	if getent passwd adminuser >/dev/null 2>&1; then
-		echo "Modify adminuser" 1>&2
-		usermod -u 1000 -d /data/adminuser -m -g opsiadmin -G opsifileadmins -s /usr/bin/zsh adminuser
-	else
+	if ! getent passwd adminuser >/dev/null 2>&1; then
 		echo "Create adminuser" 1>&2
 		useradd -u 1000 -d /data/adminuser -m -g opsiadmin -G opsifileadmins -s /usr/bin/zsh adminuser || true
 		cp -a /root/.zshrc /data/adminuser/
@@ -95,11 +97,70 @@ function setup_users {
 		chown -R adminuser:opsiadmin -R /data/adminuser/.oh-my-zsh
 	fi
 	echo "adminuser:${OPSI_ADMIN_PASSWORD}" | chpasswd
+
+	if [ -z $OPSI_ROOT_PASSWORD ]; then
+		passwd --delete root
+	else
+		echo "root:${OPSI_ROOT_PASSWORD}" | chpasswd
+	fi
+}
+
+
+function configure_supervisord() {
+	echo "* Configure supervisord" 1>&2
+
+	autostart_opsipxeconfd="false"
+	autostart_tftpd="false"
+	if [[ "${OPSI_TFTPBOOT}" =~ ^(true|yes|y|1)$ ]]; then
+		autostart_opsipxeconfd="true"
+		autostart_tftpd="true"
+	fi
+	cat > /etc/supervisor/conf.d/supervisord.conf <<EOF
+[supervisord]
+nodaemon=true
+user=root
+
+[program:opsiconfd]
+command=/usr/bin/opsiconfd -l4
+autostart=true
+
+[program:opsipxeconfd]
+command=/usr/bin/opsipxeconfd --no-fork start
+autostart=${autostart_opsipxeconfd}
+
+[program:tftpd]
+command=/usr/sbin/in.tftpd -v --ipv4 --listen --foreground --blocksize 1024 --address :69 --secure /tftpboot
+autostart=${autostart_tftpd}
+EOF
+
+	mkdir -p /var/run/opsipxeconfd
+}
+
+
+function wait_for_mysql() {
+	echo "* Waiting for MySQL" 1>&2
+	while ! nc -v -z -w3 $MYSQL_HOST 3306 >/dev/null 2>&1; do
+		sleep 1
+	done
+}
+
+
+function wait_for_redis() {
+	echo "* Waiting for Redis" 1>&2
+	while ! nc -v -z -w3 $REDIS_HOST 6379 >/dev/null 2>&1; do
+		sleep 1
+	done
 }
 
 
 set_environment_vars
-init_volumes
+wait_for_redis
+if [ "${OPSI_HOST_ROLE}" = "configserver" ]; then
+	wait_for_mysql
+fi
+
+set run_set_rights=false
+init_volumes || run_set_rights=true
 
 if [ "${OPSI_HOST_ROLE}" = "depotserver" ]; then
 	backend_config_depotserver
@@ -111,6 +172,12 @@ else
 fi
 
 setup_users
+configure_supervisord
 
-echo "* Start opsiconfd" 1>&2
-exec opsiconfd
+if $run_set_rights; then
+	echo "* Run opsi-set-rights" 1>&2
+	opsi-set-rights
+fi
+
+echo "* Start supervisord" 1>&2
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

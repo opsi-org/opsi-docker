@@ -22,7 +22,7 @@ volumes:
 services:
   mysql:
     image: mariadb:latest
-    command: --max_allowed_packet=256M --sort_buffer_size=4M
+    command: --max_connections=1000 --max_allowed_packet=256M --sort_buffer_size=4M
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
@@ -59,6 +59,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4447:4447"
+      - "69:69/udp"
     hostname: opsi
     domainname: domain.tld
     environment:
@@ -66,9 +67,12 @@ services:
       MYSQL_HOST: mysql
       REDIS_HOST: redis
       GRAFANA_HOST: grafana
+      OPSI_ADMIN_PASSWORD: juosiesah6Ie
+      OPSI_ROOT_PASSWORD:
       # configserver / depotserver
       OPSI_HOST_ROLE: configserver
-      OPSI_ADMIN_PASSWORD: juosiesah6Ie
+      # Run tftp server and opsipxeconfd? ("true"/"false")
+      OPSI_TFTPBOOT: "true"
       # OPSI_SERVICE_ADDRESS and OPSI_HOST_KEY is needed for depotserver role only
       OPSI_SERVICE_ADDRESS:
       OPSI_HOST_KEY:

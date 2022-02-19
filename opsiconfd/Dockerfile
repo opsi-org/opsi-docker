@@ -13,11 +13,13 @@ ENV OPSI_SERVICE_ADDRESS=
 ENV OPSI_HOST_ID=
 ENV OPSI_HOST_KEY=
 ENV OPSI_HOST_ROLE=configserver
+ENV OPSI_TFTPBOOT=true
 ENV OPSI_ADMIN_PASSWORD=opsi
 ENV MYSQL_ADDRESS=mysql
 ENV MYSQL_DATABASE=opsi
 ENV MYSQL_USER=opsi
 ENV MYSQL_PASSWORD=opsi
+ENV ROOT_PASSWORD=
 
 RUN apt-get update && \
 	apt-get --yes dist-upgrade && \
@@ -30,7 +32,11 @@ RUN apt-get update && \
 		iproute2 \
 		locales \
 		vim \
-		git
+		git \
+		sudo \
+		procps \
+		netcat \
+		supervisor
 
 RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
 	locale-gen
@@ -40,6 +46,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 
 RUN echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] ${OPSI_REPO} /" > /etc/apt/sources.list.d/opsi.list && \
+	echo "deb [trusted=yes] http://obs.uib.gmbh:82/home:/uibmz:/opsi:/4.2:/experimental/Debian_11/ /" > /etc/apt/sources.list.d/opsi.list && \
 	mkdir /usr/local/share/keyrings && \
 	chmod 755 /usr/local/share/keyrings && \
 	wget -nv ${OPSI_REPO}Release.key -q -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs.gpg && \
@@ -62,6 +69,6 @@ RUN	apt-get clean && \
 
 VOLUME /data
 
-EXPOSE 4447
+EXPOSE 4447 69/udp
 
 ENTRYPOINT /entrypoint.sh
