@@ -23,6 +23,7 @@ ENV ROOT_PASSWORD=
 ENV TFTPD_ARGS="-v --ipv4 --listen --foreground --blocksize 1024 --address :69 --secure /tftpboot"
 ENV OPSIPXECONFD_ARGS="--no-fork start"
 ENV OPSICONFD_ARGS="-l4"
+ENV OPSICONFD_ADMIN_INTERFACE_TERMINAL_SHELL="sudo su - adminuser"
 
 RUN apt-get update && \
 	apt-get --yes dist-upgrade && \
@@ -63,13 +64,8 @@ RUN mkdir /data && \
 	sed -i '1i export TERM=xterm-256color' /root/.zshrc && \
 	sed -i s'/^plugins.*/plugins=(git zsh-autosuggestions history)/' /root/.zshrc && \
 	usermod -s /usr/bin/zsh root && \
-	cp -a /root/.zshrc /var/lib/opsi && \
-	chown opsiconfd:opsiadmin /var/lib/opsi/.zshrc && \
-	chmod 600 /var/lib/opsi/.zshrc && \
-	cp -a /root/.oh-my-zsh /var/lib/opsi && \
-	chown -R opsiconfd:opsiadmin /var/lib/opsi/.oh-my-zsh && \
-	chmod g-rwx,o-rwx -R /var/lib/opsi/.oh-my-zsh && \
-	usermod -s /usr/bin/zsh opsiconfd
+	echo "opsiconfd ALL=NOPASSWD: /bin/su - adminuser" > /etc/sudoers.d/opsiconfd && \
+	chmod 440 /etc/sudoers.d/opsiconfd
 
 RUN	apt-get clean && \
 	rm /tmp/* && \

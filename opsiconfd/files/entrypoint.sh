@@ -99,7 +99,7 @@ function setup_users {
 	echo "adminuser:${OPSI_ADMIN_PASSWORD}" | chpasswd
 
 	if [ -z $OPSI_ROOT_PASSWORD ]; then
-		passwd --delete root
+		passwd --lock root
 	else
 		echo "root:${OPSI_ROOT_PASSWORD}" | chpasswd
 	fi
