@@ -121,15 +121,15 @@ nodaemon=true
 user=root
 
 [program:opsiconfd]
-command=/usr/bin/opsiconfd -l4
+command=/usr/bin/opsiconfd ${OPSICONFD_ARGS}
 autostart=true
 
 [program:opsipxeconfd]
-command=/usr/bin/opsipxeconfd --no-fork start
+command=/usr/bin/opsipxeconfd ${OPSIPXECONFD_ARGS}
 autostart=${autostart_opsipxeconfd}
 
 [program:tftpd]
-command=/usr/sbin/in.tftpd -v --ipv4 --listen --foreground --blocksize 1024 --address :69 --secure /tftpboot
+command=/usr/sbin/in.tftpd ${TFTPD_ARGS}
 autostart=${autostart_tftpd}
 EOF
 
