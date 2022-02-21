@@ -51,12 +51,10 @@ services:
       - /etc/timezone:/etc/timezone:ro
 
   opsiconfd:
+    image: docker.uib.gmbh/opsi/prod/opsiconfd:4.2-development
     depends_on:
       - mysql
       - redis
-    build:
-      context: opsiconfd
-      dockerfile: Dockerfile
     ports:
       - "4447:4447"
       - "69:69/udp"

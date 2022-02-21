@@ -1,0 +1,18 @@
+image: debian:bullseye
+
+stages:
+  - build_and_publish
+
+build_and_publish:docker_image_internal:
+  stage: build_and_publish
+  #when: manual
+  only:
+    - tags
+  script:
+    - apt-get update
+    - apt-get --yes install docker.io
+    - export REGISTRY="docker.uib.gmbh/opsi/prod"
+    - export OPSI_VERSION="4.2"
+    - export OPSI_BRANCH="development"
+    - ./dev.sh build
+    - ./dev.sh publish
