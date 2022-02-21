@@ -8,6 +8,7 @@ IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
 
 
 function build {
+	echo "Build ${IMAGE_NAME}:${IMAGE_TAG}" 1>&2
 	docker build --no-cache \
 		--tag "${IMAGE_NAME}:${IMAGE_TAG}" \
 		--build-arg OPSI_VERSION=$OPSI_VERSION \
@@ -17,6 +18,7 @@ function build {
 
 
 function publish {
+	echo "Publish ${IMAGE_NAME}:${IMAGE_TAG} in ${REGISTRY}" 1>&2
 	opsiconfd_version=$(docker run -e OPSI_HOSTNAME=opsiconfd.opsi.org --entrypoint /usr/bin/opsiconfd "${IMAGE_NAME}:${IMAGE_TAG}" --version | cut -d' ' -f1)
 
 	docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
@@ -30,11 +32,13 @@ function publish {
 
 
 function prune {
+	echo "Prune containers and volumes" 1>&2
 	docker-compose rm -f
 	docker volume prune -f
 }
 
 function run {
+	echo "Run opsiconfd" 1>&2
 	docker-compose up
 }
 
