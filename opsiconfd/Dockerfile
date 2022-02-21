@@ -20,6 +20,9 @@ ENV MYSQL_DATABASE=opsi
 ENV MYSQL_USER=opsi
 ENV MYSQL_PASSWORD=opsi
 ENV ROOT_PASSWORD=
+ENV TFTPD_ARGS="-v --ipv4 --listen --foreground --blocksize 1024 --address :69 --secure /tftpboot"
+ENV OPSIPXECONFD_ARGS="--no-fork start"
+ENV OPSICONFD_ARGS="-l4"
 
 RUN apt-get update && \
 	apt-get --yes dist-upgrade && \
@@ -46,7 +49,6 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 
 RUN echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] ${OPSI_REPO} /" > /etc/apt/sources.list.d/opsi.list && \
-	echo "deb [trusted=yes] http://obs.uib.gmbh:82/home:/uibmz:/opsi:/4.2:/experimental/Debian_11/ /" > /etc/apt/sources.list.d/opsi.list && \
 	mkdir /usr/local/share/keyrings && \
 	chmod 755 /usr/local/share/keyrings && \
 	wget -nv ${OPSI_REPO}Release.key -q -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs.gpg && \
@@ -60,7 +62,14 @@ RUN mkdir /data && \
 	git clone https://github.com/zsh-users/zsh-autosuggestions /root/.oh-my-zsh/custom/plugins/zsh-autosuggestions && \
 	sed -i '1i export TERM=xterm-256color' /root/.zshrc && \
 	sed -i s'/^plugins.*/plugins=(git zsh-autosuggestions history)/' /root/.zshrc && \
-	usermod -s /usr/bin/zsh root
+	usermod -s /usr/bin/zsh root && \
+	cp -a /root/.zshrc /var/lib/opsi && \
+	chown opsiconfd:opsiadmin /var/lib/opsi/.zshrc && \
+	chmod 600 /var/lib/opsi/.zshrc && \
+	cp -a /root/.oh-my-zsh /var/lib/opsi && \
+	chown -R opsiconfd:opsiadmin /var/lib/opsi/.oh-my-zsh && \
+	chmod g-rwx,o-rwx -R /var/lib/opsi/.oh-my-zsh && \
+	usermod -s /usr/bin/zsh opsiconfd
 
 RUN	apt-get clean && \
 	rm /tmp/* && \
