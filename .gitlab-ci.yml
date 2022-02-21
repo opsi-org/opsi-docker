@@ -3,6 +3,21 @@ image: debian:bullseye
 stages:
   - build_and_publish
 
+build_and_publish:docker_image_dockerhub:
+  stage: build_and_publish
+  when: manual
+  only:
+    - tags
+  script:
+    - apt-get update
+    - apt-get --yes install docker.io
+    - export REGISTRY="uibmz/opsiconfd"
+    - export OPSI_VERSION="4.2"
+    - export OPSI_BRANCH="development"
+    - docker login -u uibmz -p $DOCKER_HUB_ACCESS_TOKEN
+    - ./dev.sh build
+    - ./dev.sh publish
+
 build_and_publish:docker_image_internal:
   stage: build_and_publish
   #when: manual
