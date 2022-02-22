@@ -64,7 +64,7 @@ function set_default_configs {
 function init_volumes {
 	echo "* Init volumes" 1>&2
 	set return_val=0
-	for dir_to_move in "/etc/opsi:etc" "/var/lib/opsi:lib" "/var/log/opsi:log" "/tftpboot:tftpboot"; do
+	for dir_to_move in "/etc/opsi:etc" "/var/lib/opsi:lib" "/var/log/opsi:log" "/tftpboot:tftpboot" "/var/lib/opsiconfd:opsiconfd"; do
 		src=${dir_to_move%:*}
 		dst=${dir_to_move#*:}
 		dst="/data/${dst}"
@@ -82,6 +82,7 @@ function init_volumes {
 			fi
 		fi
 	done
+	chmod -R o+rX /data/tftpboot
 	return $return_val
 }
 
@@ -115,22 +116,46 @@ function configure_supervisord() {
 		autostart_opsipxeconfd="true"
 		autostart_tftpd="true"
 	fi
-	cat > /etc/supervisor/conf.d/supervisord.conf <<EOF
+	cat > /etc/supervisor/supervisord.conf <<EOF
 [supervisord]
 nodaemon=true
 user=root
+logfile=/var/log/supervisor/supervisord.log
+pidfile=/var/run/supervisord.pid
+childlogdir=/var/log/supervisor
+
+[unix_http_server]
+file=/var/run/supervisor.sock
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+[supervisorctl]
+serverurl=unix:///var/run/supervisor.sock
 
 [program:opsiconfd]
 command=/usr/bin/opsiconfd ${OPSICONFD_ARGS}
 autostart=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
 
 [program:opsipxeconfd]
 command=/usr/bin/opsipxeconfd ${OPSIPXECONFD_ARGS}
 autostart=${autostart_opsipxeconfd}
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
 
 [program:tftpd]
 command=/usr/sbin/in.tftpd ${TFTPD_ARGS}
 autostart=${autostart_tftpd}
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
 EOF
 
 	mkdir -p /var/run/opsipxeconfd
@@ -180,4 +205,4 @@ if $run_set_rights; then
 fi
 
 echo "* Start supervisord" 1>&2
-exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf

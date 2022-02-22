@@ -6,7 +6,7 @@ LABEL maintainer="uib GmbH <info@uib.de>"
 
 ARG DEBIAN_VERSION=11
 ARG OPSI_VERSION=4.2
-ARG OPSI_BRANCH=development
+ARG OPSI_BRANCH=testing
 
 ENV OPSI_REPO=https://download.opensuse.org/repositories/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/
 ENV OPSI_SERVICE_ADDRESS=
@@ -23,7 +23,7 @@ ENV ROOT_PASSWORD=
 ENV TFTPD_ARGS="-v --ipv4 --listen --foreground --blocksize 1024 --address :69 --secure /tftpboot"
 ENV OPSIPXECONFD_ARGS="--no-fork start"
 ENV OPSICONFD_ARGS="-l4"
-ENV OPSICONFD_ADMIN_INTERFACE_TERMINAL_SHELL="sudo su - adminuser"
+ENV OPSICONFD_ADMIN_INTERFACE_TERMINAL_SHELL="/usr/bin/zsh"
 
 RUN apt-get update && \
 	apt-get --yes dist-upgrade && \
@@ -64,11 +64,15 @@ RUN mkdir /data && \
 	sed -i '1i export TERM=xterm-256color' /root/.zshrc && \
 	sed -i s'/^plugins.*/plugins=(git zsh-autosuggestions history)/' /root/.zshrc && \
 	usermod -s /usr/bin/zsh root && \
-	echo "opsiconfd ALL=NOPASSWD: /bin/su - adminuser" > /etc/sudoers.d/opsiconfd && \
-	chmod 440 /etc/sudoers.d/opsiconfd
+	mkdir -p /var/lib/opsiconfd/home && \
+	usermod -s /usr/bin/zsh -d /var/lib/opsiconfd/home opsiconfd && \
+	cp -a /root/.zshrc /var/lib/opsiconfd/home/.zshrc && \
+	cp -a /root/.oh-my-zsh /var/lib/opsiconfd/home/.oh-my-zsh && \
+	echo "cd /var/lib/opsi" >> /var/lib/opsiconfd/home/.zshrc && \
+	chown -R opsiconfd:opsiadmin /var/lib/opsiconfd/home
 
 RUN	apt-get clean && \
-	rm /tmp/* && \
+	(rm /tmp/* || true) && \
 	rm /etc/opsi/ssl/* && \
 	rm -rf /var/lib/apt/lists/*
 

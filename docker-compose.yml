@@ -51,7 +51,10 @@ services:
       - /etc/timezone:/etc/timezone:ro
 
   opsiconfd:
-    image: docker.uib.gmbh/opsi/prod/opsiconfd:4.2-development
+    image: docker.uib.gmbh/opsi/prod/opsiconfd:4.2-testing
+    #build:
+    #  context: opsiconfd
+    #  dockerfile: Dockerfile
     depends_on:
       - mysql
       - redis
@@ -79,6 +82,8 @@ services:
       OPSICONFD_LOG_LEVEL: 5
       OPSICONFD_LOG_LEVEL_STDERR: 3
       OPSICONFD_LOG_LEVEL_FILE: 5
+    cap_add:
+      - SYS_PTRACE
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
