@@ -9,7 +9,7 @@ IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
 
 function build {
 	echo "Build ${IMAGE_NAME}:${IMAGE_TAG}" 1>&2
-	docker build --no-cache \
+	docker build $1 \
 		--tag "${IMAGE_NAME}:${IMAGE_TAG}" \
 		--build-arg OPSI_VERSION=$OPSI_VERSION \
 		--build-arg OPSI_BRANCH=$OPSI_BRANCH \
@@ -45,7 +45,7 @@ function run {
 
 case $1 in
 	"build")
-		build
+		build $2
 	;;
 	"run")
 		run

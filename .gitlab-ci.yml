@@ -15,7 +15,7 @@ build_and_publish:docker_image_dockerhub:
     - export OPSI_VERSION="4.2"
     - export OPSI_BRANCH="development"
     - docker login -u uibmz -p $DOCKER_HUB_ACCESS_TOKEN
-    - ./dev.sh build
+    - ./dev.sh build --no-cache
     - ./dev.sh publish
 
 build_and_publish:docker_image_internal:
@@ -29,5 +29,5 @@ build_and_publish:docker_image_internal:
     - export REGISTRY="docker.uib.gmbh/opsi/prod"
     - export OPSI_VERSION="4.2"
     - export OPSI_BRANCH="development"
-    - ./dev.sh build
+    - ./dev.sh build --no-cache
     - ./dev.sh publish
