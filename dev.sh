@@ -1,7 +1,7 @@
 #!/bin/bash
 
-IMAGE_NAME="opsiconfd"
-[ -z $REGISTRY ] && REGISTRY="docker.uib.gmbh/opsi/prod"
+IMAGE_NAME="opsi-server"
+[ -z $REGISTRY ] && REGISTRY="docker.uib.gmbh/opsi"
 [ -z $OPSI_VERSION ] && OPSI_VERSION="4.2"
 [ -z $OPSI_BRANCH ] && OPSI_BRANCH="development"
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"

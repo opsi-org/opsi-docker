@@ -50,10 +50,10 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
 
-  opsiconfd:
-    image: docker.uib.gmbh/opsi/prod/opsiconfd:4.2-testing
+  opsi-server:
+    image: docker.uib.gmbh/opsi/opsi-server:4.2-testing
     #build:
-    #  context: opsiconfd
+    #  context: opsi-server
     #  dockerfile: Dockerfile
     depends_on:
       - mysql
@@ -80,12 +80,10 @@ services:
       # opsconfd config
       OPSICONFD_GRAFANA_EXTERNAL_URL: http://grafana.domain.tld:3000
       OPSICONFD_LOG_LEVEL: 5
-      OPSICONFD_LOG_LEVEL_STDERR: 3
-      OPSICONFD_LOG_LEVEL_FILE: 5
+      OPSICONFD_LOG_LEVEL_FILE: 4
     cap_add:
       - SYS_PTRACE
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
       - opsi_data:/data
-

@@ -1,7 +1,6 @@
 # Official opsi server image
 
-This image can be used to set up an opsi configserver or a depotserver.
-There is currently no netboot functionality available.
+This image can be used to set up a opsi config-server or a depot-server.
 Depot share is WebDAV only, there is no Samba server included in this image.
 
 # How to use this image

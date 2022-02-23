@@ -11,7 +11,7 @@ build_and_publish:docker_image_dockerhub:
   script:
     - apt-get update
     - apt-get --yes install docker.io
-    - export REGISTRY="uibmz/opsiconfd"
+    - export REGISTRY="uibmz/opsi-server"
     - export OPSI_VERSION="4.2"
     - export OPSI_BRANCH="development"
     - docker login -u uibmz -p $DOCKER_HUB_ACCESS_TOKEN
@@ -26,7 +26,7 @@ build_and_publish:docker_image_internal:
   script:
     - apt-get update
     - apt-get --yes install docker.io
-    - export REGISTRY="docker.uib.gmbh/opsi/prod"
+    - export REGISTRY="docker.uib.gmbh/opsi"
     - export OPSI_VERSION="4.2"
     - export OPSI_BRANCH="development"
     - ./dev.sh build --no-cache
