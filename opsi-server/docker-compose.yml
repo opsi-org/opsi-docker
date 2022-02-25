@@ -43,6 +43,8 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
     environment:
       <<: *common-grafana-variables
       GF_INSTALL_PLUGINS: grafana-simple-json-datasource
@@ -51,10 +53,10 @@ services:
       - /etc/timezone:/etc/timezone:ro
 
   opsi-server:
-    image: docker.uib.gmbh/opsi/opsi-server:4.2-testing
-    #build:
-    #  context: opsi-server
-    #  dockerfile: Dockerfile
+    #image: docker.uib.gmbh/opsi/opsi-server:4.2-testing
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
       - mysql
       - redis
@@ -78,7 +80,7 @@ services:
       OPSI_SERVICE_ADDRESS:
       OPSI_HOST_KEY:
       # opsconfd config
-      OPSICONFD_GRAFANA_EXTERNAL_URL: http://grafana.domain.tld:3000
+      OPSICONFD_GRAFANA_EXTERNAL_URL: http://opsi.domain.tld:3000
       OPSICONFD_LOG_LEVEL: 5
       OPSICONFD_LOG_LEVEL_FILE: 4
     cap_add:

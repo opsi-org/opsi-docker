@@ -6,7 +6,7 @@ LABEL maintainer="uib GmbH <info@uib.de>"
 
 ARG DEBIAN_VERSION=11
 ARG OPSI_VERSION=4.2
-ARG OPSI_BRANCH=testing
+ARG OPSI_BRANCH=development
 
 ENV OPSI_REPO=https://download.opensuse.org/repositories/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/
 ENV OPSI_SERVICE_ADDRESS=
@@ -24,6 +24,7 @@ ENV TFTPD_ARGS="-v --ipv4 --listen --foreground --blocksize 1024 --address :69 -
 ENV OPSIPXECONFD_ARGS="--no-fork start"
 ENV OPSICONFD_ARGS="-l4"
 ENV OPSICONFD_ADMIN_INTERFACE_TERMINAL_SHELL="/usr/bin/zsh"
+ENV OPSICONFD_GRAFANA_DATA_SOURCE_URL="https://opsi-server:4447"
 
 RUN apt-get update && \
 	apt-get --yes dist-upgrade && \
@@ -40,6 +41,7 @@ RUN apt-get update && \
 		sudo \
 		procps \
 		netcat \
+		iputils-ping \
 		supervisor
 
 RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \

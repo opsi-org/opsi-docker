@@ -32,7 +32,19 @@ config = {
 	"password": "${MYSQL_PASSWORD}"
 }
 EOF
+
+if [[ "${OPSI_TFTPBOOT}" =~ ^(true|yes|y|1)$ ]]; then
+	cat > /etc/opsi/backendManager/dispatch.conf <<EOF
+backend_.*         : mysql, opsipxeconfd
+host_.*            : mysql, opsipxeconfd
+productOnClient_.* : mysql, opsipxeconfd
+configState_.*     : mysql, opsipxeconfd
+.*                 : mysql
+EOF
+else
 	echo ".*: mysql" > /etc/opsi/backendManager/dispatch.conf
+fi
+
 }
 
 
