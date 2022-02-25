@@ -36,3 +36,10 @@ In this case you should also remove `mysql` from the `depends_on` attribute of t
 ## TFTP netboot
 - If TFTP netboot is not needed, you should disable opsipxeconfd and opsi-tftp-hpa
 by setting the environment variable `OPSI_TFTPBOOT` to `"false"`.
+
+# Next steps
+- Open the address `https://<FQDN>:4447` in a browser.
+- Login as `adminuser` with password `<OPSI_ADMIN_PASSWORD>` as set in the docker-compose.yml.
+- Open the `Licensing`-Tab and upload your opsi license files.
+- You can use the `Terminal`-Tab to get a terminal on your server.
+- Continue reading https://download.uib.de/opsi4.2/documentation/html/en/opsi-getting-started-v4.2/opsi-getting-started-v4.2.html
