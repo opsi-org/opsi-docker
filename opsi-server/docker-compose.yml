@@ -53,10 +53,10 @@ services:
       - /etc/timezone:/etc/timezone:ro
 
   opsi-server:
-    #image: docker.uib.gmbh/opsi/opsi-server:4.2-testing
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: docker.uib.gmbh/opsi/opsi-server:4.2-experimental
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile
     depends_on:
       - mysql
       - redis
