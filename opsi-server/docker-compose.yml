@@ -21,7 +21,7 @@ volumes:
     driver: local
 services:
   mysql:
-    image: mariadb:latest
+    image: mariadb:10.7
     command: --max_connections=1000 --max_allowed_packet=256M --sort_buffer_size=4M
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -54,9 +54,7 @@ services:
 
   opsi-server:
     image: docker.uib.gmbh/opsi/opsi-server:4.2-experimental
-    #build:
-    #  context: .
-    #  dockerfile: Dockerfile
+    #image: opsi-server:4.2-experimental
     depends_on:
       - mysql
       - redis

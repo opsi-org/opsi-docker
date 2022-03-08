@@ -58,7 +58,7 @@ config = {
 	"address": "${OPSI_SERVICE_ADDRESS}",
 	"username": "${OPSI_HOST_ID}",
 	"password": "${OPSI_HOST_KEY}"
-
+}
 EOF
 	echo ".*: jsonrpc" > /etc/opsi/backendManager/dispatch.conf
 }

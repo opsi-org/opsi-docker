@@ -1,9 +1,11 @@
 #!/bin/bash
 
+cd $(dirname "${BASH_SOURCE[0]}")
+
 IMAGE_NAME="opsi-server"
 [ -z $REGISTRY ] && REGISTRY="docker.uib.gmbh/opsi"
 [ -z $OPSI_VERSION ] && OPSI_VERSION="4.2"
-[ -z $OPSI_BRANCH ] && OPSI_BRANCH="development"
+[ -z $OPSI_BRANCH ] && OPSI_BRANCH="experimental"
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
 
 
@@ -13,7 +15,7 @@ function build {
 		--tag "${IMAGE_NAME}:${IMAGE_TAG}" \
 		--build-arg OPSI_VERSION=$OPSI_VERSION \
 		--build-arg OPSI_BRANCH=$OPSI_BRANCH \
-		opsiconfd
+		.
 }
 
 
@@ -32,32 +34,76 @@ function publish {
 
 
 function prune {
-	echo "Prune containers and volumes" 1>&2
-	docker-compose rm -f
-	docker volume prune -f
+	echo "Prune containers, images and volumes" 1>&2
+	read -p "Are you sure? (y/n): " -n 1 -r
+	echo ""
+	if [[ $REPLY =~ ^[Yy]$ ]]; then
+		stop
+		docker-compose rm -f
+		docker volume prune -f
+		docker image ls "opsi-server*" --quiet | xargs docker image rm 2>/dev/null
+	fi
 }
 
-function run {
-	echo "Run opsiconfd" 1>&2
-	docker-compose up
+function start {
+	echo "Start containers" 1>&2
+	docker-compose up -d
+}
+
+
+function stop {
+	echo "Stop containers" 1>&2
+	docker-compose stop
+}
+
+
+function logs {
+	docker-compose logs -f
+}
+
+
+function shell {
+	service="$1"
+	cmd="sh"
+	[ -z $service ] && service="opsi-server"
+	[ $service = "opsi-server" ] && cmd="zsh"
+	docker-compose exec $service $cmd
 }
 
 
 case $1 in
-	"build")
-		build $2
+	"start")
+		start
 	;;
-	"run")
-		run
+	"stop")
+		stop
 	;;
-	"publish")
-		publish
+	"logs")
+		logs
+	;;
+	"shell")
+		shell
 	;;
 	"prune")
 		prune
 	;;
+	"build")
+		build
+	;;
+	"publish")
+		publish
+	;;
 	*)
-		echo "Usage: $0 {build|run|publish|prune}"
+		echo "Usage: $0 {start|stop|logs|prune|build|publish}"
+		echo ""
+		echo "  start                Start all containers."
+		echo "  stop                 Stop all containers."
+		echo "  logs                 Attach to container logs."
+		echo "  shell [service]      Exexute a shell in the running container (default service: opsi-server)."
+		echo "  prune                Delete all containers and unassociated volumes."
+		echo "  build [--no-cache]   Build opsi-server image. Use --no-cache to build without cache."
+		echo "  publish              Publish opsi-server image."
+		echo ""
 		exit 1
 	;;
 esac
