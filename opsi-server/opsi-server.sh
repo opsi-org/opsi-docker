@@ -71,6 +71,13 @@ function shell {
 }
 
 
+function update {
+	docker-compose pull
+	stop
+	start
+}
+
+
 case $1 in
 	"start")
 		start
@@ -84,6 +91,9 @@ case $1 in
 	"shell")
 		shell
 	;;
+	"update")
+		update
+	;;
 	"prune")
 		prune
 	;;
@@ -94,12 +104,13 @@ case $1 in
 		publish
 	;;
 	*)
-		echo "Usage: $0 {start|stop|logs|prune|build|publish}"
+		echo "Usage: $0 {start|stop|logs|shell|update|prune|build|publish}"
 		echo ""
 		echo "  start                Start all containers."
 		echo "  stop                 Stop all containers."
 		echo "  logs                 Attach to container logs."
 		echo "  shell [service]      Exexute a shell in the running container (default service: opsi-server)."
+		echo "  update               Update and restart all containers."
 		echo "  prune                Delete all containers and unassociated volumes."
 		echo "  build [--no-cache]   Build opsi-server image. Use --no-cache to build without cache."
 		echo "  publish              Publish opsi-server image."
