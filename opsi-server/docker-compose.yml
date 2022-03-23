@@ -57,9 +57,9 @@ services:
       GF_INSTALL_PLUGINS: grafana-simple-json-datasource
 
   opsi-server:
-    #image: docker.uib.gmbh/opsi/opsi-server:4.2-experimental
+    image: docker.uib.gmbh/opsi/opsi-server:4.2-experimental
     #image: opsi-server:4.2-experimental
-    build: .
+    #build: .
     <<: *restart-policy
     depends_on:
       - mysql
