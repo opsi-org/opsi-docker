@@ -1,5 +1,8 @@
 version: '3.4'
 
+x-restart-policy: &restart-policy
+  restart: unless-stopped
+
 x-common-mysql-variables: &common-mysql-variables
   MYSQL_DATABASE: opsi
   MYSQL_USER: opsi
@@ -22,18 +25,20 @@ volumes:
 services:
   mysql:
     image: mariadb:10.7
+    <<: *restart-policy
     command: --max_connections=1000 --max_allowed_packet=256M --sort_buffer_size=4M
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-      - mysql_data:/var/lib/mysql
     environment:
        <<: *common-mysql-variables
        MYSQL_ROOT_PASSWORD: oareaNg6Ooz4teik
        MYSQL_INITDB_SKIP_TZINFO: 1
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - mysql_data:/var/lib/mysql
 
   redis:
     image: redislabs/redistimeseries:latest
+    <<: *restart-policy
     command: sh -c "redis-server --requirepass $$REDIS_PASSWORD --loadmodule /usr/lib/redis/modules/redistimeseries.so"
     environment: *common-redis-variables
     volumes:
@@ -43,6 +48,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    <<: *restart-policy
     ports:
       - "3000:3000"
     environment:
@@ -55,6 +61,7 @@ services:
   opsi-server:
     image: docker.uib.gmbh/opsi/opsi-server:4.2-experimental
     #image: opsi-server:4.2-experimental
+    <<: *restart-policy
     depends_on:
       - mysql
       - redis
