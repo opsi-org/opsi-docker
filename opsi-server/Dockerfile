@@ -25,6 +25,7 @@ ENV OPSIPXECONFD_ARGS="--no-fork start"
 ENV OPSICONFD_ARGS="-l4"
 ENV OPSICONFD_ADMIN_INTERFACE_TERMINAL_SHELL="/usr/bin/zsh"
 ENV OPSICONFD_GRAFANA_DATA_SOURCE_URL="https://opsi-server:4447"
+ENV TZ="Europe/Berlin"
 
 RUN apt-get update && \
 	apt-get --yes dist-upgrade && \
@@ -50,6 +51,8 @@ RUN sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
+
+RUN ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime && echo "${TZ}" > /etc/timezone
 
 RUN echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] ${OPSI_REPO} /" > /etc/apt/sources.list.d/opsi.list && \
 	mkdir /usr/local/share/keyrings && \

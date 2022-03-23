@@ -3,6 +3,9 @@ version: '3.4'
 x-restart-policy: &restart-policy
   restart: unless-stopped
 
+x-common-variables: &common-variables
+  TZ: Europe/Berlin
+
 x-common-mysql-variables: &common-mysql-variables
   MYSQL_DATABASE: opsi
   MYSQL_USER: opsi
@@ -29,22 +32,18 @@ services:
     <<: *restart-policy
     command: --max_connections=1000 --max_allowed_packet=256M --sort_buffer_size=4M
     environment:
-       <<: *common-mysql-variables
+       <<: [*common-variables, *common-mysql-variables]
        MYSQL_ROOT_PASSWORD: oareaNg6Ooz4teik
        MYSQL_INITDB_SKIP_TZINFO: 1
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
       - mysql_data:/var/lib/mysql
 
   redis:
     image: redislabs/redistimeseries:latest
     <<: *restart-policy
     command: sh -c "redis-server --requirepass $$REDIS_PASSWORD --loadmodule /usr/lib/redis/modules/redistimeseries.so"
-    environment: *common-redis-variables
+    environment: [*common-variables, *common-redis-variables]
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
       - redis_data:/data
 
   grafana:
@@ -53,11 +52,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      <<: *common-grafana-variables
+      <<: [*common-variables, *common-grafana-variables]
       GF_INSTALL_PLUGINS: grafana-simple-json-datasource
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
 
   opsi-server:
     image: docker.uib.gmbh/opsi/opsi-server:4.2-experimental
@@ -72,7 +68,7 @@ services:
     hostname: opsi
     domainname: domain.tld
     environment:
-      <<: [*common-mysql-variables, *common-grafana-variables, *common-redis-variables]
+      <<: [*common-variables, *common-mysql-variables, *common-grafana-variables, *common-redis-variables]
       MYSQL_HOST: mysql
       REDIS_HOST: redis
       GRAFANA_HOST: grafana
@@ -92,6 +88,4 @@ services:
     cap_add:
       - SYS_PTRACE
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
       - opsi_data:/data

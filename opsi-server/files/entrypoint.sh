@@ -19,6 +19,12 @@ function set_environment_vars {
 }
 
 
+function set_timezone {
+	ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime
+	echo "${TZ}" > /etc/timezone
+}
+
+
 function backend_config_configserver {
 	echo "* Configure backend for configserver" 1>&2
 	cat > /etc/opsi/backends/mysql.conf <<EOF
@@ -191,6 +197,7 @@ function wait_for_redis() {
 
 
 set_environment_vars
+set_timezone
 wait_for_redis
 if [ "${OPSI_HOST_ROLE}" = "configserver" ]; then
 	wait_for_mysql
