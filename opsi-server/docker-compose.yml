@@ -42,7 +42,8 @@ services:
     image: redislabs/redistimeseries:latest
     <<: *restart-policy
     command: sh -c "redis-server --requirepass $$REDIS_PASSWORD --loadmodule /usr/lib/redis/modules/redistimeseries.so"
-    environment: [*common-variables, *common-redis-variables]
+    environment:
+      <<: [*common-variables, *common-redis-variables]
     volumes:
       - redis_data:/data
 
@@ -56,8 +57,9 @@ services:
       GF_INSTALL_PLUGINS: grafana-simple-json-datasource
 
   opsi-server:
-    image: docker.uib.gmbh/opsi/opsi-server:4.2-experimental
+    #image: docker.uib.gmbh/opsi/opsi-server:4.2-experimental
     #image: opsi-server:4.2-experimental
+    build: .
     <<: *restart-policy
     depends_on:
       - mysql
