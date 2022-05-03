@@ -41,7 +41,7 @@ function prune {
 		stop
 		docker-compose rm -f
 		docker volume prune -f
-		docker image ls "opsi-server*" --quiet | xargs docker image rm 2>/dev/null
+		docker image ls "opsi-server*" --quiet | xargs docker image rm --force 2>/dev/null
 	fi
 }
 
