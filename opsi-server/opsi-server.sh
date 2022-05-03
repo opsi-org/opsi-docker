@@ -77,6 +77,21 @@ function update {
 	start
 }
 
+function export_images {
+	archive="opsi-server-images.tar.gz"
+	[ -e "${archive}" ] && rm "${archive}"
+	images=$(docker-compose config | grep image | sed s'/.*image:\s*//' | tr '\n' ' ')
+	echo "Exporting images ${images} to ${archive}" 1>&2
+	docker save ${images} | gzip > "${archive}"
+}
+
+function import_images {
+	archive="$1"
+	[ -e "${archive}" ] || (echo "Archive ${archive} not found" 1>&2; exit 1)
+	echo "Importing images from ${archive}" 1>&2
+	docker load -i "${archive}"
+}
+
 
 case $1 in
 	"start")
@@ -103,17 +118,25 @@ case $1 in
 	"publish")
 		publish
 	;;
+	"export-images")
+		export_images
+	;;
+	"import-images")
+		import_images $2
+	;;
 	*)
-		echo "Usage: $0 {start|stop|logs|shell|update|prune|build|publish}"
+		echo "Usage: $0 {start|stop|logs|shell|update|prune|build|publish|export-images|import-images}"
 		echo ""
-		echo "  start                Start all containers."
-		echo "  stop                 Stop all containers."
-		echo "  logs                 Attach to container logs."
-		echo "  shell [service]      Exexute a shell in the running container (default service: opsi-server)."
-		echo "  update               Update and restart all containers."
-		echo "  prune                Delete all containers and unassociated volumes."
-		echo "  build [--no-cache]   Build opsi-server image. Use --no-cache to build without cache."
-		echo "  publish              Publish opsi-server image."
+		echo "  start                     Start all containers."
+		echo "  stop                      Stop all containers."
+		echo "  logs                      Attach to container logs."
+		echo "  shell [service]           Exexute a shell in the running container (default service: opsi-server)."
+		echo "  update                    Update and restart all containers."
+		echo "  prune                     Delete all containers and unassociated volumes."
+		echo "  build [--no-cache]        Build opsi-server image. Use --no-cache to build without cache."
+		echo "  publish                   Publish opsi-server image."
+		echo "  export-images             Export images as archive."
+		echo "  import-images <archive>   Import images from archive."
 		echo ""
 		exit 1
 	;;
