@@ -80,9 +80,9 @@ function od_update {
 function od_export_images {
 	archive="opsi-server-images.tar.gz"
 	[ -e "${archive}" ] && rm "${archive}"
-	images=$(docker-compose config | grep image | sed s'/.*image:\s*//' | tr '\n' ' ')
-	echo "Exporting images ${images} to ${archive}" 1>&2
-	docker save ${images} | gzip > "${archive}"
+	images=( $(docker-compose config | grep image | sed s'/.*image:\s*//' | tr '\n' ' ') )
+	echo "Exporting images ${images[@]} to ${archive}" 1>&2
+	docker save ${images[@]} | gzip > "${archive}"
 }
 
 function od_import_images {
