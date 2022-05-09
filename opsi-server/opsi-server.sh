@@ -9,7 +9,7 @@ IMAGE_NAME="opsi-server"
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
 
 
-function build {
+function od_build {
 	echo "Build ${IMAGE_NAME}:${IMAGE_TAG}" 1>&2
 	docker build $1 \
 		--tag "${IMAGE_NAME}:${IMAGE_TAG}" \
@@ -19,7 +19,7 @@ function build {
 }
 
 
-function publish {
+function od_publish {
 	echo "Publish ${IMAGE_NAME}:${IMAGE_TAG} in ${REGISTRY}" 1>&2
 	opsiconfd_version=$(docker run -e OPSI_HOSTNAME=opsiconfd.opsi.org --entrypoint /usr/bin/opsiconfd "${IMAGE_NAME}:${IMAGE_TAG}" --version | cut -d' ' -f1)
 
@@ -33,36 +33,36 @@ function publish {
 }
 
 
-function prune {
+function od_prune {
 	echo "Prune containers, images and volumes" 1>&2
 	read -p "Are you sure? (y/n): " -n 1 -r
 	echo ""
 	if [[ $REPLY =~ ^[Yy]$ ]]; then
-		stop
+		od_stop
 		docker-compose rm -f
 		docker volume prune -f
 		docker image ls "opsi-server*" --quiet | xargs docker image rm --force 2>/dev/null
 	fi
 }
 
-function start {
+function od_start {
 	echo "Start containers" 1>&2
 	docker-compose up -d
 }
 
 
-function stop {
+function od_stop {
 	echo "Stop containers" 1>&2
 	docker-compose stop
 }
 
 
-function logs {
-	docker-compose logs -f
+function od_logs {
+	docker-compose logs -f $1
 }
 
 
-function shell {
+function od_shell {
 	service="$1"
 	cmd="sh"
 	[ -z $service ] && service="opsi-server"
@@ -71,13 +71,13 @@ function shell {
 }
 
 
-function update {
+function od_update {
 	docker-compose pull
-	stop
-	start
+	od_stop
+	od_start
 }
 
-function export_images {
+function od_export_images {
 	archive="opsi-server-images.tar.gz"
 	[ -e "${archive}" ] && rm "${archive}"
 	images=$(docker-compose config | grep image | sed s'/.*image:\s*//' | tr '\n' ' ')
@@ -85,59 +85,62 @@ function export_images {
 	docker save ${images} | gzip > "${archive}"
 }
 
-function import_images {
+function od_import_images {
 	archive="$1"
 	[ -e "${archive}" ] || (echo "Archive ${archive} not found" 1>&2; exit 1)
 	echo "Importing images from ${archive}" 1>&2
 	docker load -i "${archive}"
 }
 
+function od_usage {
+	echo "Usage: $0 {start|stop|logs|shell|update|prune|build|publish|export-images|import-images}"
+	echo ""
+	echo "  start                     Start all containers."
+	echo "  stop                      Stop all containers."
+	echo "  logs [service]            Attach to container logs (all logs or supplied service)."
+	echo "  shell [service]           Exexute a shell in the running container (default service: opsi-server)."
+	echo "  update                    Update and restart all containers."
+	echo "  prune                     Delete all containers and unassociated volumes."
+	echo "  build [--no-cache]        Build opsi-server image. Use --no-cache to build without cache."
+	echo "  publish                   Publish opsi-server image."
+	echo "  export-images             Export images as archive."
+	echo "  import-images <archive>   Import images from archive."
+	echo ""
+}
 
 case $1 in
 	"start")
-		start
+		od_start
 	;;
 	"stop")
-		stop
+		od_stop
 	;;
 	"logs")
-		logs
+		od_logs $2
 	;;
 	"shell")
-		shell
+		od_shell $2
 	;;
 	"update")
-		update
+		od_update
 	;;
 	"prune")
-		prune
+		od_prune
 	;;
 	"build")
-		build
+		od_build $2
 	;;
 	"publish")
-		publish
+		od_publish
 	;;
 	"export-images")
-		export_images
+		od_export_images
 	;;
 	"import-images")
-		import_images $2
+		od_import_images $2
 	;;
 	*)
-		echo "Usage: $0 {start|stop|logs|shell|update|prune|build|publish|export-images|import-images}"
-		echo ""
-		echo "  start                     Start all containers."
-		echo "  stop                      Stop all containers."
-		echo "  logs                      Attach to container logs."
-		echo "  shell [service]           Exexute a shell in the running container (default service: opsi-server)."
-		echo "  update                    Update and restart all containers."
-		echo "  prune                     Delete all containers and unassociated volumes."
-		echo "  build [--no-cache]        Build opsi-server image. Use --no-cache to build without cache."
-		echo "  publish                   Publish opsi-server image."
-		echo "  export-images             Export images as archive."
-		echo "  import-images <archive>   Import images from archive."
-		echo ""
+		od_usage
 		exit 1
 	;;
 esac
