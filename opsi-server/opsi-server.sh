@@ -104,24 +104,32 @@ function od_open_volumes {
 	sudo xdg-open /var/lib/docker/volumes
 }
 
+function od_edit {
+	xdg-open docker-compose.yml
+}
+
 function od_usage {
-	echo "Usage: $0 {start|stop|logs|shell|update|prune|build|publish|export-images|import-images}"
+	echo "Usage: $0 {edit|start|stop|logs|shell|update|open-volumes|prune|export-images|import-images|build|publish}"
 	echo ""
+	echo "  edit                      Edit docker-compose.yml."
 	echo "  start                     Start all containers."
 	echo "  stop                      Stop all containers."
 	echo "  logs [service]            Attach to container logs (all logs or supplied service)."
 	echo "  shell [service]           Exexute a shell in the running container (default service: opsi-server)."
 	echo "  update                    Update and restart all containers."
+	echo "  open-volumes              Open volumes directory in explorer."
 	echo "  prune                     Delete all containers and unassociated volumes."
-	echo "  build [--no-cache]        Build opsi-server image. Use --no-cache to build without cache."
-	echo "  publish                   Publish opsi-server image."
 	echo "  export-images             Export images as archive."
 	echo "  import-images <archive>   Import images from archive."
-	echo "  open-volumes              Open volumes directory in explorer."
+	echo "  build [--no-cache]        Build opsi-server image. Use --no-cache to build without cache."
+	echo "  publish                   Publish opsi-server image."
 	echo ""
 }
 
 case $1 in
+	"edit")
+		od_edit
+	;;
 	"start")
 		od_start
 	;;
@@ -137,14 +145,11 @@ case $1 in
 	"update")
 		od_update
 	;;
+	"open-volumes")
+		od_open_volumes
+	;;
 	"prune")
 		od_prune
-	;;
-	"build")
-		od_build $2
-	;;
-	"publish")
-		od_publish
 	;;
 	"export-images")
 		od_export_images
@@ -152,8 +157,11 @@ case $1 in
 	"import-images")
 		od_import_images $2
 	;;
-	"open-volumes")
-		od_open_volumes
+	"build")
+		od_build $2
+	;;
+	"publish")
+		od_publish
 	;;
 	*)
 		od_usage

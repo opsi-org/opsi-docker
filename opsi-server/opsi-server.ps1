@@ -101,25 +101,33 @@ function od_import_images {
 }
 
 function od_open_volumes {
-	Start explorer.exe "\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes"
+	start explorer.exe "\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes"
+}
+
+function od_edit {
+	start docker-compose.yml
 }
 
 function od_usage {
-	Write-Host "Usage: $(Split-Path -Path $PSCommandPath -Leaf) {start|stop|logs|shell|update|prune|export-images|import-images}"
+	Write-Host "Usage: $(Split-Path -Path $PSCommandPath -Leaf) {edit|start|stop|logs|shell|update|open-volumes|prune|export-images|import-images}"
 	Write-Host ""
+	Write-Host "  edit                      Edit docker-compose.yml."
 	Write-Host "  start                     Start all containers."
 	Write-Host "  stop                      Stop all containers."
 	Write-Host "  logs [service]            Attach to container logs (all logs or supplied service)."
 	Write-Host "  shell [service]           Exexute a shell in the running container (default service: opsi-server)."
 	Write-Host "  update                    Update and restart all containers."
+	Write-Host "  open-volumes              Open volumes directory in explorer."
 	Write-Host "  prune                     Delete all containers and unassociated volumes."
 	Write-Host "  export-images             Export images as archive."
 	Write-Host "  import-images <archive>   Import images from archive."
-	Write-Host "  open-volumes              Open volumes directory in explorer."
 	Write-Host ""
 }
 
 switch ($args[0]) {
+	"edit" {
+		od_edit
+	}
 	"start" {
 		od_start
 	}
@@ -135,6 +143,9 @@ switch ($args[0]) {
 	"update" {
 		od_update
 	}
+	"open-volumes" {
+		od_open_volumes
+	}
 	"prune" {
 		od_prune
 	}
@@ -143,9 +154,6 @@ switch ($args[0]) {
 	}
 	"import-images" {
 		od_import_images $args[1]
-	}
-	"open-volumes" {
-		od_open_volumes
 	}
 	default {
 		od_usage
