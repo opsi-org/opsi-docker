@@ -32,16 +32,20 @@ function od_publish {
 	docker images "${REGISTRY}/${IMAGE_NAME}"
 }
 
-
 function od_prune {
 	echo "Prune containers, images and volumes" 1>&2
 	read -p "Are you sure? (y/n): " -n 1 -r
 	echo ""
 	if [[ $REPLY =~ ^[Yy]$ ]]; then
 		od_stop
+		echo "Delete containers" 1>&2
 		docker-compose rm -f
+		echo "Delete volumes" 1>&2
 		docker volume prune -f
-		docker image ls "opsi-server*" --quiet | xargs docker image rm --force 2>/dev/null
+		echo "Delete images" 1>&2
+		for image in $(docker-compose config | grep "image:" | sed s'/.*image:\s*//' | tr '\n' ' '); do
+			docker image rm --force $image 2>/dev/null
+		fi
 	fi
 }
 
@@ -80,9 +84,13 @@ function od_update {
 function od_export_images {
 	archive="opsi-server-images.tar.gz"
 	[ -e "${archive}" ] && rm "${archive}"
-	images=( $(docker-compose config | grep image | sed s'/.*image:\s*//' | tr '\n' ' ') )
-	echo "Exporting images ${images[@]} to ${archive}" 1>&2
-	docker save ${images[@]} | gzip > "${archive}"
+	images=( $(docker-compose config | grep "image:" | sed s'/.*image:\s*//' | tr '\n' ' ') )
+	if [ ${#images[@]} -gt 0 ]; then
+		echo "Exporting images ${images[@]} to ${archive}" 1>&2
+		docker save ${images[@]} | gzip > "${archive}"
+	else
+		echo "No images found to export" 1>&2
+	fi
 }
 
 function od_import_images {

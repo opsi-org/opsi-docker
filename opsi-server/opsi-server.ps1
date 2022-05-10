@@ -1,5 +1,6 @@
 
-Set-Location -Path $(Split-Path -Path $PSCommandPath -Parent)
+$context_dir = $(Split-Path -Path $PSCommandPath -Parent)
+Set-Location -Path $context_dir
 
 
 function od_prune {
@@ -8,30 +9,41 @@ function od_prune {
 	$key = $Host.UI.RawUI.ReadKey().Character
 	Write-Host ""
 	if ($key -eq "Y" -Or $key -eq "y") {
-		#od_stop
-		# docker-compose rm -f
-		# docker volume prune -f
-		# &"myapp.exe" @(Get-ChildItem -Recurse -Filter *.jpg | Another-Step)
-		# @(docker image ls "opsi-server*" --quiet) | xargs docker image rm --force 2>/dev/null
-		# @(docker image ls "opsi-server*" --quiet)
+		od_stop
+		$images = @()
+		$out = docker-compose config
+		$pattern = "\s*image:\s*([^\s]+)\s*"
+		$matches = [regex]::Matches($out, $pattern)
+		foreach ($match in $matches) {
+			$images += $match.Groups[1].Value
+		}
+		Write-Host "Delete containers"
+		docker-compose rm -f
+		Write-Host "Delete volumes"
+		docker volume prune -f
+		$out = docker image ls "opsi-server*" --quiet
+		Write-Host "Delete images"
+		foreach($image in $images) {
+			docker image rm --force $image
+		}
 	}
 }
 
 function od_start {
 	Write-Host "Start containers"
-	& docker-compose up -d
+	docker-compose up -d
 }
 
 function od_stop {
 	Write-Host "Stop containers"
-	& docker-compose stop
+	docker-compose stop
 }
 
 function od_logs {
 	param (
 		$service
 	)
-	& docker-compose logs -f $service
+	docker-compose logs -f $service
 }
 
 function od_shell {
@@ -45,23 +57,35 @@ function od_shell {
 	if ($service -eq "opsi-server") {
 		$cmd = "zsh"
 	}
-	& docker-compose exec $service $cmd
+	docker-compose exec $service $cmd
 }
 
 function od_update {
-	& docker-compose pull
+	docker-compose pull
 	od_stop
 	od_start
 }
 
 function od_export_images {
-	$archive = "opsi-server-images.tar.gz"
+	$archive = "opsi-server-images.tar"
 	if (Test-Path -Path $archive -PathType Leaf) {
 		Remove-Item -Path $archive
 	}
-	#images=$(docker-compose config | grep image | sed s'/.*image:\s*//' | tr '\n' ' ')
-	#echo "Exporting images ${images} to ${archive}" 1>&2
-	#& docker save ${images} | gzip > "${archive}"
+	$images = @()
+	$out = docker-compose config
+	$pattern = "\s*image:\s*([^\s]+)\s*"
+	$matches = [regex]::Matches($out, $pattern)
+	foreach ($match in $matches) {
+		$images += $match.Groups[1].Value
+	}
+	if ($images.count -gt 0) {
+		Write-Host "Exporting images $images to $archive"
+		$archive = Join-Path $context_dir -ChildPath $archive
+		docker save $images -o "$archive"
+	}
+	else {
+		Write-Host "No images found to export"
+	}
 }
 
 function od_import_images {
@@ -73,7 +97,7 @@ function od_import_images {
 		exit 1
 	}
 	Write-Host "Importing images from $archive"
-	& docker load -i $archive
+	docker load -i $archive
 }
 
 function od_usage {
