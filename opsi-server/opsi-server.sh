@@ -45,7 +45,7 @@ function od_prune {
 		echo "Delete images" 1>&2
 		for image in $(docker-compose config | grep "image:" | sed s'/.*image:\s*//' | tr '\n' ' '); do
 			docker image rm --force $image 2>/dev/null
-		fi
+		done
 	fi
 }
 
@@ -100,6 +100,10 @@ function od_import_images {
 	docker load -i "${archive}"
 }
 
+function od_open_volumes {
+	sudo xdg-open /var/lib/docker/volumes
+}
+
 function od_usage {
 	echo "Usage: $0 {start|stop|logs|shell|update|prune|build|publish|export-images|import-images}"
 	echo ""
@@ -113,6 +117,7 @@ function od_usage {
 	echo "  publish                   Publish opsi-server image."
 	echo "  export-images             Export images as archive."
 	echo "  import-images <archive>   Import images from archive."
+	echo "  open-volumes              Open volumes directory in explorer."
 	echo ""
 }
 
@@ -146,6 +151,9 @@ case $1 in
 	;;
 	"import-images")
 		od_import_images $2
+	;;
+	"open-volumes")
+		od_open_volumes
 	;;
 	*)
 		od_usage

@@ -100,6 +100,10 @@ function od_import_images {
 	docker load -i $archive
 }
 
+function od_open_volumes {
+	Start explorer.exe "\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes"
+}
+
 function od_usage {
 	Write-Host "Usage: $(Split-Path -Path $PSCommandPath -Leaf) {start|stop|logs|shell|update|prune|export-images|import-images}"
 	Write-Host ""
@@ -111,6 +115,7 @@ function od_usage {
 	Write-Host "  prune                     Delete all containers and unassociated volumes."
 	Write-Host "  export-images             Export images as archive."
 	Write-Host "  import-images <archive>   Import images from archive."
+	Write-Host "  open-volumes              Open volumes directory in explorer."
 	Write-Host ""
 }
 
@@ -138,6 +143,9 @@ switch ($args[0]) {
 	}
 	"import-images" {
 		od_import_images $args[1]
+	}
+	"open-volumes" {
+		od_open_volumes
 	}
 	default {
 		od_usage
