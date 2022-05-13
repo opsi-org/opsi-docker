@@ -29,15 +29,18 @@ function od_prune {
 	}
 }
 
+
 function od_start {
 	Write-Host "Start containers"
 	docker-compose up -d
 }
 
+
 function od_stop {
 	Write-Host "Stop containers"
 	docker-compose stop
 }
+
 
 function od_logs {
 	param (
@@ -45,6 +48,7 @@ function od_logs {
 	)
 	docker-compose logs -f $service
 }
+
 
 function od_shell {
 	param (
@@ -60,11 +64,13 @@ function od_shell {
 	docker-compose exec $service $cmd
 }
 
+
 function od_update {
 	docker-compose pull
 	od_stop
 	od_start
 }
+
 
 function od_export_images {
 	$archive = "opsi-server-images.tar"
@@ -88,6 +94,7 @@ function od_export_images {
 	}
 }
 
+
 function od_import_images {
 	param (
 		$archive
@@ -100,17 +107,43 @@ function od_import_images {
 	docker load -i $archive
 }
 
+
 function od_open_volumes {
 	start explorer.exe "\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes"
 }
+
 
 function od_edit {
 	start docker-compose.yml
 }
 
+
+function od_inspect {
+	param (
+		$service
+	)
+	if (!$service) {
+		$service = "opsi-server"
+	}
+	docker inspect opsi-server_$service_1
+}
+
+
+function od_diff {
+	param (
+		$service
+	)
+	if (!$service) {
+		$service = "opsi-server"
+	}
+	docker diff opsi-server_$service_1
+}
+
+
 function od_usage {
-	Write-Host "Usage: $(Split-Path -Path $PSCommandPath -Leaf) {edit|start|stop|logs|shell|update|open-volumes|prune|export-images|import-images}"
+	Write-Host "Usage: $(Split-Path -Path $PSCommandPath -Leaf) <command>"
 	Write-Host ""
+	Write-Host "Commands:"
 	Write-Host "  edit                      Edit docker-compose.yml."
 	Write-Host "  start                     Start all containers."
 	Write-Host "  stop                      Stop all containers."
@@ -118,11 +151,14 @@ function od_usage {
 	Write-Host "  shell [service]           Exexute a shell in the running container (default service: opsi-server)."
 	Write-Host "  update                    Update and restart all containers."
 	Write-Host "  open-volumes              Open volumes directory in explorer."
+	Write-Host "  inspect [service]         Show detailed container informations (default service: opsi-server)."
+	Write-Host "  diff [service]            Show container's filesystem changes (default service: opsi-server)."
 	Write-Host "  prune                     Delete all containers and unassociated volumes."
 	Write-Host "  export-images             Export images as archive."
 	Write-Host "  import-images <archive>   Import images from archive."
 	Write-Host ""
 }
+
 
 switch ($args[0]) {
 	"edit" {
@@ -145,6 +181,12 @@ switch ($args[0]) {
 	}
 	"open-volumes" {
 		od_open_volumes
+	}
+	"inspect" {
+		od_inspect $args[1]
+	}
+	"diff" {
+		od_diff $args[1]
 	}
 	"prune" {
 		od_prune

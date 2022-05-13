@@ -81,6 +81,7 @@ function od_update {
 	od_start
 }
 
+
 function od_export_images {
 	archive="opsi-server-images.tar.gz"
 	[ -e "${archive}" ] && rm "${archive}"
@@ -93,6 +94,7 @@ function od_export_images {
 	fi
 }
 
+
 function od_import_images {
 	archive="$1"
 	[ -e "${archive}" ] || (echo "Archive ${archive} not found" 1>&2; exit 1)
@@ -100,17 +102,35 @@ function od_import_images {
 	docker load -i "${archive}"
 }
 
+
 function od_open_volumes {
 	sudo xdg-open /var/lib/docker/volumes
 }
+
 
 function od_edit {
 	xdg-open docker-compose.yml
 }
 
+
+function od_inspect {
+	service="$1"
+	[ -z $service ] && service="opsi-server"
+	docker inspect opsi-server_${service}_1
+}
+
+
+function od_diff {
+	service="$1"
+	[ -z $service ] && service="opsi-server"
+	docker diff opsi-server_${service}_1
+}
+
+
 function od_usage {
-	echo "Usage: $0 {edit|start|stop|logs|shell|update|open-volumes|prune|export-images|import-images|build|publish}"
+	echo "Usage: $0 <command>"
 	echo ""
+	echo "Commands:"
 	echo "  edit                      Edit docker-compose.yml."
 	echo "  start                     Start all containers."
 	echo "  stop                      Stop all containers."
@@ -118,6 +138,8 @@ function od_usage {
 	echo "  shell [service]           Exexute a shell in the running container (default service: opsi-server)."
 	echo "  update                    Update and restart all containers."
 	echo "  open-volumes              Open volumes directory in explorer."
+	echo "  inspect [service]         Show detailed container informations (default service: opsi-server)."
+	echo "  diff [service]            Show container's filesystem changes (default service: opsi-server)."
 	echo "  prune                     Delete all containers and unassociated volumes."
 	echo "  export-images             Export images as archive."
 	echo "  import-images <archive>   Import images from archive."
@@ -125,6 +147,7 @@ function od_usage {
 	echo "  publish                   Publish opsi-server image."
 	echo ""
 }
+
 
 case $1 in
 	"edit")
@@ -147,6 +170,12 @@ case $1 in
 	;;
 	"open-volumes")
 		od_open_volumes
+	;;
+	"inspect")
+		od_inspect $2
+	;;
+	"diff")
+		od_diff $2
 	;;
 	"prune")
 		od_prune
