@@ -27,10 +27,12 @@ RUN apt-get update \
 		sudo \
 		procps \
 		netcat \
+		libnss3-tools \
 		iputils-ping \
 		ca-certificates \
 		xfce4 \
 		xfce4-terminal \
+		mousepad \
 		xorgxrdp \
 		xrdp \
 		davfs2 \
@@ -38,8 +40,7 @@ RUN apt-get update \
 		openssh-server \
 		supervisor \
 		openssh-client \
-		chromium \
-		chromium-sandbox \
+		firefox-esr \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -51,12 +52,11 @@ RUN	sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
 	&& cp /etc/X11/xrdp/xorg.conf /etc/X11 \
 	&& sed -i "s#xrdp/xorg#xorg#g" /etc/xrdp/sesman.ini \
 	&& rm -f /etc/ssh/ssh_host_* \
-	&& rm -rf /etc/xrdp/rsakeys.ini \
-	&& rm /etc/xrdp/*.pem
+	&& rm -rf /etc/xrdp/rsakeys.ini
 
 COPY files/ /
 
-#VOLUME /home
+VOLUME /home
 
 EXPOSE 22 3389
 
