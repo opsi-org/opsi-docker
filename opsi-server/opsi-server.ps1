@@ -9,23 +9,7 @@ function od_prune {
 	$key = $Host.UI.RawUI.ReadKey().Character
 	Write-Host ""
 	if ($key -eq "Y" -Or $key -eq "y") {
-		od_stop
-		$images = @()
-		$out = docker-compose config
-		$pattern = "\s*image:\s*([^\s]+)\s*"
-		$matches = [regex]::Matches($out, $pattern)
-		foreach ($match in $matches) {
-			$images += $match.Groups[1].Value
-		}
-		Write-Host "Delete containers"
-		docker-compose rm -f
-		Write-Host "Delete volumes"
-		docker volume prune -f
-		$out = docker image ls "opsi-server*" --quiet
-		Write-Host "Delete images"
-		foreach($image in $images) {
-			docker image rm --force $image
-		}
+		docker-compose down -v
 	}
 }
 
