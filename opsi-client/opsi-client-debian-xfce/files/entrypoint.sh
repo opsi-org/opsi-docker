@@ -13,6 +13,14 @@ if [ -n $opsi_ip ]; then
 	echo "${opsi_ip}   opsi-server.${domain} opsi.${domain} opsi-server opsi" >> /tmp/hosts
 	cat /tmp/hosts > /etc/hosts
 	rm /tmp/hosts
+
+	if wget --no-check-certificate -q "https://opsi.${domain}:4447/ssl/opsi-ca-cert.pem" -O /usr/local/share/ca-certificates/opsi_CA.crt; then
+		update-ca-certificates
+		for cert_db in $(find /home/*/.mozilla -name "cert*.db"); do
+			cert_dir="$(dirname ${cert_db})"
+			certutil -A -n "opsi CA" -t "TCu,Cuw,Tuw" -i /usr/local/share/ca-certificates/opsi_CA.crt -d "${cert_dir}"
+		done
+	fi
 fi
 
 cat > /etc/supervisor/supervisord.conf <<EOF
