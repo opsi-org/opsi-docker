@@ -37,15 +37,7 @@ function od_prune {
 	read -p "Are you sure? (y/n): " -n 1 -r
 	echo ""
 	if [[ $REPLY =~ ^[Yy]$ ]]; then
-		od_stop
-		echo "Delete containers" 1>&2
-		docker-compose rm -f
-		echo "Delete volumes" 1>&2
-		docker volume prune -f
-		echo "Delete images" 1>&2
-		for image in $(docker-compose config | grep "image:" | sed s'/.*image:\s*//' | tr '\n' ' '); do
-			docker image rm --force $image 2>/dev/null
-		done
+		docker-compose down -v
 	fi
 }
 
