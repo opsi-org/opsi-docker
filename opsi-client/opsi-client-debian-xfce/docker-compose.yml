@@ -17,11 +17,9 @@ services:
       - home:/home
     ports:
       - "2222:22"
-      - "3389:3389"
+      - "3390:3389"
     hostname: opsi-client-debian-xfce
     domainname: domain.tld
-    #links:
-    #  - "opsi.domain.tld:opsi-server_opsi-server_1"
     # Needed for cifs / webdav mount
     privileged: true
     cap_add:
