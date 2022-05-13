@@ -33,7 +33,7 @@ function od_publish {
 }
 
 function od_prune {
-	echo "Prune containers, images and volumes" 1>&2
+	echo "Prune opsi-server containers, networks and volumes" 1>&2
 	read -p "Are you sure? (y/n): " -n 1 -r
 	echo ""
 	if [[ $REPLY =~ ^[Yy]$ ]]; then

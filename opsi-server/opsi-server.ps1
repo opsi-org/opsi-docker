@@ -4,7 +4,7 @@ Set-Location -Path $context_dir
 
 
 function od_prune {
-	Write-Host "Prune containers, images and volumes"
+	Write-Host "Prune opsi-server containers, networks and volumes"
 	Write-Host -NoNewline "Are you sure? (y/n): "
 	$key = $Host.UI.RawUI.ReadKey().Character
 	Write-Host ""
