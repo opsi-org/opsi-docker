@@ -1,8 +1,8 @@
 #!/bin/bash
 
-PROJECT_NAME="opsi-server"
-IMAGE_NAME="opsi-server"
-DEFAULT_SERVICE="opsi-server"
+PROJECT_NAME="opsi-client-debian-xfce"
+IMAGE_NAME="opsi-client-debian-xfce"
+DEFAULT_SERVICE="opsi-client-debian-xfce"
 [ -z $REGISTRY ] && REGISTRY="docker.uib.gmbh/opsi"
 [ -z $OPSI_VERSION ] && OPSI_VERSION="4.2"
 [ -z $OPSI_BRANCH ] && OPSI_BRANCH="experimental"
