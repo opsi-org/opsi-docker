@@ -5,12 +5,14 @@ $DEFAULT_SERVICE = "opsi-server"
 $context_dir = $(Split-Path -Path $PSCommandPath -Parent)
 Set-Location -Path $context_dir
 
+
 function od_prune {
 	Write-Host "Prune $PROJECT_NAME containers, networks and volumes"
 	Write-Host -NoNewline "Are you sure? (y/n): "
 	$key = $Host.UI.RawUI.ReadKey().Character
 	Write-Host ""
 	if ($key -eq "Y" -Or $key -eq "y") {
+		Write-Host "docker-compose down -d"
 		docker-compose down -v
 	}
 }
@@ -18,12 +20,14 @@ function od_prune {
 
 function od_start {
 	Write-Host "Start containers"
+	Write-Host "docker-compose up -d"
 	docker-compose up -d
 }
 
 
 function od_stop {
 	Write-Host "Stop containers"
+	Write-Host "docker-compose stop"
 	docker-compose stop
 }
 
@@ -32,6 +36,7 @@ function od_logs {
 	param (
 		$service
 	)
+	Write-Host "docker-compose logs -f $service"
 	docker-compose logs -f $service
 }
 
@@ -47,11 +52,13 @@ function od_shell {
 	if ($service -eq "opsi-server") {
 		$cmd = "zsh"
 	}
+	Write-Host "docker-compose exec $service $cmd"
 	docker-compose exec $service $cmd
 }
 
 
 function od_update {
+	Write-Host "docker-compose pull"
 	docker-compose pull
 	od_stop
 	od_start
@@ -73,6 +80,7 @@ function od_export_images {
 	if ($images.count -gt 0) {
 		Write-Host "Exporting images $images to $archive"
 		$archive = Join-Path $context_dir -ChildPath $archive
+		Write-Host "docker save $images -o \"$archive\""
 		docker save $images -o "$archive"
 	}
 	else {
@@ -93,6 +101,7 @@ function od_import_images {
 		exit 1
 	}
 	Write-Host "Importing images from $archive"
+	Write-Host "docker load -i $archive"
 	docker load -i $archive
 }
 
@@ -114,6 +123,7 @@ function od_inspect {
 	if (!$service) {
 		$service = $DEFAULT_SERVICE
 	}
+	Write-Host "docker inspect " + $PROJECT_NAME + "_" + $service + "_1"
 	docker inspect $PROJECT_NAME + "_" + $service + "_1"
 }
 
@@ -125,6 +135,7 @@ function od_diff {
 	if (!$service) {
 		$service = $DEFAULT_SERVICE
 	}
+	Write-Host "docker diff " + $PROJECT_NAME + "_" + $service + "_1"
 	docker diff $PROJECT_NAME + "_" + $service + "_1"
 }
 

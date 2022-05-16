@@ -39,23 +39,27 @@ function od_prune {
 	read -p "Are you sure? (y/n): " -n 1 -r
 	echo ""
 	if [[ $REPLY =~ ^[Yy]$ ]]; then
+		echo "docker-compose down -v" 1>&2
 		docker-compose down -v
 	fi
 }
 
 function od_start {
 	echo "Start containers" 1>&2
+	echo "docker-compose up -d" 1>&2
 	docker-compose up -d
 }
 
 
 function od_stop {
 	echo "Stop containers" 1>&2
+	echo "docker-compose stop" 1>&2
 	docker-compose stop
 }
 
 
 function od_logs {
+	echo "docker-compose logs -f $1" 1>&2
 	docker-compose logs -f $1
 }
 
@@ -65,11 +69,13 @@ function od_shell {
 	cmd="sh"
 	[ -z $service ] && service=$DEFAULT_SERVICE
 	[ $service = "opsi-server" ] && cmd="zsh"
+	echo "docker-compose exec $service $cmd" 1>&2
 	docker-compose exec $service $cmd
 }
 
 
 function od_update {
+	echo "docker-compose pull" 1>&2
 	docker-compose pull
 	od_stop
 	od_start
@@ -82,6 +88,7 @@ function od_export_images {
 	images=( $(docker-compose config | grep "image:" | sed s'/.*image:\s*//' | tr '\n' ' ') )
 	if [ ${#images[@]} -gt 0 ]; then
 		echo "Exporting images ${images[@]} to ${archive}" 1>&2
+		echo "docker save ${images[@]} | gzip > \"${archive}\"" 1>&2
 		docker save ${images[@]} | gzip > "${archive}"
 	else
 		echo "No images found to export" 1>&2
@@ -97,6 +104,7 @@ function od_import_images {
 		exit 1
 	fi
 	echo "Importing images from ${archive}" 1>&2
+	echo "docker load -i \"${archive}\"" 1>&2
 	docker load -i "${archive}"
 }
 
@@ -114,6 +122,7 @@ function od_edit {
 function od_inspect {
 	service="$1"
 	[ -z $service ] && service=$DEFAULT_SERVICE
+	echo "docker inspect ${PROJECT_NAME}_${service}_1" 1>&2
 	docker inspect ${PROJECT_NAME}_${service}_1
 }
 
@@ -121,6 +130,7 @@ function od_inspect {
 function od_diff {
 	service="$1"
 	[ -z $service ] && service=$DEFAULT_SERVICE
+	echo "docker diff ${PROJECT_NAME}_${service}_1" 1>&2
 	docker diff ${PROJECT_NAME}_${service}_1
 }
 
