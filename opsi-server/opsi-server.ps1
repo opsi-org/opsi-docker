@@ -25,6 +25,12 @@ function od_start {
 }
 
 
+function od_status {
+	Write-Host "docker-compose ps"
+	docker-compose ps
+}
+
+
 function od_stop {
 	Write-Host "Stop containers"
 	Write-Host "docker-compose stop"
@@ -60,6 +66,9 @@ function od_shell {
 function od_update {
 	Write-Host "docker-compose pull"
 	docker-compose pull
+	if ($? -eq $false) {
+		exit 1
+	}
 	od_stop
 	od_start
 }
@@ -146,9 +155,10 @@ function od_usage {
 	Write-Host "Commands:"
 	Write-Host "  edit                      Edit docker-compose.yml."
 	Write-Host "  start                     Start all containers."
+	Write-Host "  status                    Show running containers."
 	Write-Host "  stop                      Stop all containers."
 	Write-Host "  logs [service]            Attach to container logs (all logs or supplied service)."
-	Write-Host "  shell [service]           Exexute a shell in the running container (default service: $DEFAULT_SERVICE)."
+	Write-Host "  shell [service]           Exexute a shell in a running container (default service: $DEFAULT_SERVICE)."
 	Write-Host "  update                    Update and restart all containers."
 	Write-Host "  open-volumes              Open volumes directory in explorer."
 	Write-Host "  inspect [service]         Show detailed container informations (default service: $DEFAULT_SERVICE)."
@@ -166,6 +176,9 @@ switch ($args[0]) {
 	}
 	"start" {
 		od_start
+	}
+	"status" {
+		od_status
 	}
 	"stop" {
 		od_stop

@@ -51,6 +51,12 @@ function od_start {
 }
 
 
+function od_status {
+	echo "docker-compose ps"
+	docker-compose ps
+}
+
+
 function od_stop {
 	echo "Stop containers" 1>&2
 	echo "docker-compose stop" 1>&2
@@ -76,7 +82,7 @@ function od_shell {
 
 function od_update {
 	echo "docker-compose pull" 1>&2
-	docker-compose pull
+	docker-compose pull || exit 1
 	od_stop
 	od_start
 }
@@ -141,9 +147,10 @@ function od_usage {
 	echo "Commands:"
 	echo "  edit                      Edit docker-compose.yml."
 	echo "  start                     Start all containers."
+	echo "  status                    Show running containers."
 	echo "  stop                      Stop all containers."
 	echo "  logs [service]            Attach to container logs (all logs or supplied service)."
-	echo "  shell [service]           Exexute a shell in the running container (default service: ${DEFAULT_SERVICE})."
+	echo "  shell [service]           Exexute a shell in a running container (default service: ${DEFAULT_SERVICE})."
 	echo "  update                    Update and restart all containers."
 	echo "  open-volumes              Open volumes directory in explorer."
 	echo "  inspect [service]         Show detailed container informations (default service: ${DEFAULT_SERVICE})."
@@ -163,6 +170,9 @@ case $1 in
 	;;
 	"start")
 		od_start
+	;;
+	"status")
+		od_status
 	;;
 	"stop")
 		od_stop
