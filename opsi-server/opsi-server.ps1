@@ -7,7 +7,7 @@ Set-Location -Path $context_dir
 
 
 function od_prune {
-	Write-Host "Prune $PROJECT_NAME containers, networks and volumes"
+	Write-Host "Prune ${PROJECT_NAME} containers, networks and volumes"
 	Write-Host -NoNewline "Are you sure? (y/n): "
 	$key = $Host.UI.RawUI.ReadKey().Character
 	Write-Host ""
@@ -132,8 +132,8 @@ function od_inspect {
 	if (!$service) {
 		$service = $DEFAULT_SERVICE
 	}
-	Write-Host "docker inspect " + $PROJECT_NAME + "_" + $service + "_1"
-	docker inspect $PROJECT_NAME + "_" + $service + "_1"
+	Write-Host "docker inspect ${PROJECT_NAME}_${service}_1"
+	docker inspect ${PROJECT_NAME}_${service}_1
 }
 
 
@@ -144,8 +144,8 @@ function od_diff {
 	if (!$service) {
 		$service = $DEFAULT_SERVICE
 	}
-	Write-Host "docker diff " + $PROJECT_NAME + "_" + $service + "_1"
-	docker diff $PROJECT_NAME + "_" + $service + "_1"
+	Write-Host "docker diff ${PROJECT_NAME}_${service}_1"
+	docker diff ${PROJECT_NAME}_${service}_1
 }
 
 
@@ -158,11 +158,11 @@ function od_usage {
 	Write-Host "  status                    Show running containers."
 	Write-Host "  stop                      Stop all containers."
 	Write-Host "  logs [service]            Attach to container logs (all logs or supplied service)."
-	Write-Host "  shell [service]           Exexute a shell in a running container (default service: $DEFAULT_SERVICE)."
+	Write-Host "  shell [service]           Exexute a shell in a running container (default service: ${DEFAULT_SERVICE})."
 	Write-Host "  update                    Update and restart all containers."
 	Write-Host "  open-volumes              Open volumes directory in explorer."
-	Write-Host "  inspect [service]         Show detailed container informations (default service: $DEFAULT_SERVICE)."
-	Write-Host "  diff [service]            Show container's filesystem changes (default service: $DEFAULT_SERVICE)."
+	Write-Host "  inspect [service]         Show detailed container informations (default service: ${DEFAULT_SERVICE})."
+	Write-Host "  diff [service]            Show container's filesystem changes (default service: ${DEFAULT_SERVICE})."
 	Write-Host "  prune                     Delete all containers and unassociated volumes."
 	Write-Host "  export-images             Export images as archive."
 	Write-Host "  import-images <archive>   Import images from archive."
