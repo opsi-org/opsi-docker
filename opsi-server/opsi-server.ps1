@@ -165,7 +165,7 @@ function od_usage {
 	Write-Host "  diff [service]            Show container's filesystem changes (default service: ${DEFAULT_SERVICE})."
 	Write-Host "  prune                     Delete all containers and unassociated volumes."
 	Write-Host "  export-images             Export images as archive."
-	Write-Host "  import-images <archive>   Import images from archive."
+	Write-Host "  import-images [archive]   Import images from archive."
 	Write-Host ""
 }
 

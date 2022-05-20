@@ -157,7 +157,7 @@ function od_usage {
 	echo "  diff [service]            Show container's filesystem changes (default service: ${DEFAULT_SERVICE})."
 	echo "  prune                     Delete all containers and unassociated volumes."
 	echo "  export-images             Export images as archive."
-	echo "  import-images <archive>   Import images from archive."
+	echo "  import-images [archive]   Import images from archive."
 	echo "  build [--no-cache]        Build ${IMAGE_NAME} image. Use --no-cache to build without cache."
 	echo "  publish                   Publish ${IMAGE_NAME} image."
 	echo ""
