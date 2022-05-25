@@ -125,7 +125,7 @@ function setup_users {
 }
 
 
-function configure_supervisord() {
+function configure_supervisord {
 	echo "* Configure supervisord" 1>&2
 
 	autostart_opsipxeconfd="false"
@@ -180,7 +180,7 @@ EOF
 }
 
 
-function wait_for_mysql() {
+function wait_for_mysql {
 	echo "* Waiting for MySQL" 1>&2
 	while ! nc -v -z -w3 $MYSQL_HOST 3306 >/dev/null 2>&1; do
 		sleep 1
@@ -188,7 +188,7 @@ function wait_for_mysql() {
 }
 
 
-function wait_for_redis() {
+function wait_for_redis {
 	echo "* Waiting for Redis" 1>&2
 	while ! nc -v -z -w3 $REDIS_HOST 6379 >/dev/null 2>&1; do
 		sleep 1
@@ -196,32 +196,42 @@ function wait_for_redis() {
 }
 
 
-set_environment_vars
-set_timezone
-wait_for_redis
-if [ "${OPSI_HOST_ROLE}" = "configserver" ]; then
-	wait_for_mysql
-fi
+function entrypoint {
+	set_environment_vars
+	set_timezone
+	wait_for_redis
+	if [ "${OPSI_HOST_ROLE}" = "configserver" ]; then
+		wait_for_mysql
+	fi
 
-set run_set_rights=false
-init_volumes || run_set_rights=true
+	set run_set_rights=false
+	init_volumes || run_set_rights=true
 
-if [ "${OPSI_HOST_ROLE}" = "depotserver" ]; then
-	backend_config_depotserver
-	opsiconfd setup
+	if [ "${OPSI_HOST_ROLE}" = "depotserver" ]; then
+		backend_config_depotserver
+		opsiconfd setup
+	else
+		backend_config_configserver
+		opsiconfd setup
+		set_default_configs
+	fi
+
+	setup_users
+	configure_supervisord
+
+	if $run_set_rights; then
+		echo "* Run opsi-set-rights" 1>&2
+		opsi-set-rights
+	fi
+
+	echo "* Start supervisord" 1>&2
+	exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+}
+
+if [ "$#" -gt "0" ]; then
+	for function in "$@"; do
+		$function
+	done
 else
-	backend_config_configserver
-	opsiconfd setup
-	set_default_configs
+	entrypoint
 fi
-
-setup_users
-configure_supervisord
-
-if $run_set_rights; then
-	echo "* Run opsi-set-rights" 1>&2
-	opsi-set-rights
-fi
-
-echo "* Start supervisord" 1>&2
-exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
