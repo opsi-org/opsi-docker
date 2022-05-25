@@ -34,6 +34,7 @@ function od_publish {
 	docker images "${REGISTRY}/${IMAGE_NAME}"
 }
 
+
 function od_prune {
 	echo "Prune ${PROJECT_NAME} containers, networks and volumes" 1>&2
 	read -p "Are you sure? (y/n): " -n 1 -r
@@ -43,6 +44,7 @@ function od_prune {
 		docker-compose down -v
 	fi
 }
+
 
 function od_start {
 	echo "Start containers" 1>&2
@@ -116,12 +118,12 @@ function od_import_images {
 
 
 function od_open_volumes {
-	sudo xdg-open /var/lib/docker/volumes
+	sudo xdg-open /var/lib/docker/volumes >/dev/null 2>&1 &
 }
 
 
 function od_edit {
-	xdg-open docker-compose.yml
+	xdg-open docker-compose.yml >/dev/null 2>&1 &
 }
 
 
