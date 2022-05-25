@@ -41,6 +41,10 @@ RUN apt-get update \
 		supervisor \
 		openssh-client \
 		firefox-esr \
+		lshw \
+		dmidecode \
+		pciutils \
+		usbutils \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
