@@ -45,6 +45,17 @@ RUN apt-get update \
 		dmidecode \
 		pciutils \
 		usbutils \
+		lsb-release \
+		cifs-utils \
+		xterm \
+		dnsutils \
+		lsof \
+		openssl \
+		pkg-config \
+		desktop-file-utils \
+		libnotify-bin \
+		libgtk2.0-0 \
+		psmisc \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
