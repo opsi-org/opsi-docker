@@ -1,0 +1,28 @@
+version: '3.4'
+
+volumes:
+ home:
+    driver: local
+
+networks:
+  default:
+    external:
+      name: opsi-server_default
+
+services:
+  opsi-client-debian-xfce:
+    #build: .
+    image: opsi-client-debian-xfce:4.2-experimental
+    volumes:
+      - home:/home
+    ports:
+      - "2222:22"
+      - "3390:3389"
+    hostname: opsi-client-debian-xfce
+    domainname: domain.tld
+    # Needed for cifs / webdav mount
+    privileged: true
+    cap_add:
+      - SYS_ADMIN
+      - DAC_READ_SEARCH
+    entrypoint: ["/entrypoint.sh"]

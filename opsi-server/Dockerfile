@@ -58,7 +58,8 @@ RUN apt-get update \
 	&& locale-gen \
 	&& ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime && echo "${TZ}" > /etc/timezone \
 	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/*
+	&& rm -rf /var/lib/apt/lists/* \
+	&& rm /etc/opsi/ssl/*
 
 COPY files/ /
 
@@ -75,8 +76,8 @@ RUN mkdir /data \
 	&& cp -a /root/.oh-my-zsh /var/lib/opsiconfd/home/.oh-my-zsh \
 	&& echo "cd /var/lib/opsi" >> /var/lib/opsiconfd/home/.zshrc \
 	&& chown -R opsiconfd:opsiadmin /var/lib/opsiconfd/home \
-	&& (rm /tmp/* || true) \
-	&& rm /etc/opsi/ssl/*
+	&& echo ". /entrypoint.sh set_environment_vars" >> /root/.zshrc \
+	&& (rm /tmp/* || true)
 
 VOLUME /data
 

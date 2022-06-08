@@ -25,6 +25,8 @@ volumes:
     driver: local
   opsi_data:
     driver: local
+  grafana_data:
+    driver: local
 
 services:
   mysql:
@@ -55,10 +57,12 @@ services:
     environment:
       <<: [*common-variables, *common-grafana-variables]
       GF_INSTALL_PLUGINS: grafana-simple-json-datasource
+      #GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s:%(http_port)s/grafana"
+    volumes:
+      - grafana_data:/var/lib/grafana
 
   opsi-server:
-    image: docker.uib.gmbh/opsi/opsi-server:4.2-experimental
-    #image: opsi-server:4.2-experimental
+    image: opsi-server:4.2-experimental
     #build: .
     <<: *restart-policy
     depends_on:
@@ -74,7 +78,7 @@ services:
       MYSQL_HOST: mysql
       REDIS_HOST: redis
       GRAFANA_HOST: grafana
-      OPSI_ADMIN_PASSWORD: juosiesah6Ie
+      OPSI_ADMIN_PASSWORD: adminuser
       OPSI_ROOT_PASSWORD:
       # configserver / depotserver
       OPSI_HOST_ROLE: configserver
@@ -84,10 +88,8 @@ services:
       OPSI_SERVICE_ADDRESS:
       OPSI_HOST_KEY:
       # opsconfd config
-      OPSICONFD_GRAFANA_EXTERNAL_URL: http://opsi.domain.tld:3000
-      OPSICONFD_LOG_LEVEL: 5
+      OPSICONFD_GRAFANA_EXTERNAL_URL: http://grafana:3000
+      OPSICONFD_LOG_LEVEL: 6
       OPSICONFD_LOG_LEVEL_FILE: 4
-    cap_add:
-      - SYS_PTRACE
     volumes:
       - opsi_data:/data
