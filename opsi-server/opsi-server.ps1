@@ -1,6 +1,11 @@
 
 $PROJECT_NAME = "opsi-server"
 $DEFAULT_SERVICE = "opsi-server"
+$DOCKER_COMPOSE = "docker-compose"
+
+if ((Get-Command $DOCKER_COMPOSE -ErrorAction SilentlyContinue) -eq $null) {
+	$DOCKER_COMPOSE = "docker compose"
+}
 
 $context_dir = $(Split-Path -Path $PSCommandPath -Parent)
 Set-Location -Path $context_dir
@@ -12,29 +17,29 @@ function od_prune {
 	$key = $Host.UI.RawUI.ReadKey().Character
 	Write-Host ""
 	if ($key -eq "Y" -Or $key -eq "y") {
-		Write-Host "docker-compose down -d"
-		docker-compose down -v
+		Write-Host "${DOCKER_COMPOSE} down -d"
+		${DOCKER_COMPOSE} down -v
 	}
 }
 
 
 function od_start {
 	Write-Host "Start containers"
-	Write-Host "docker-compose up -d"
-	docker-compose up -d
+	Write-Host "${DOCKER_COMPOSE} up -d"
+	${DOCKER_COMPOSE} up -d
 }
 
 
 function od_status {
-	Write-Host "docker-compose ps"
-	docker-compose ps
+	Write-Host "${DOCKER_COMPOSE} ps"
+	${DOCKER_COMPOSE} ps
 }
 
 
 function od_stop {
 	Write-Host "Stop containers"
-	Write-Host "docker-compose stop"
-	docker-compose stop
+	Write-Host "${DOCKER_COMPOSE} stop"
+	${DOCKER_COMPOSE} stop
 }
 
 
@@ -42,8 +47,8 @@ function od_logs {
 	param (
 		$service
 	)
-	Write-Host "docker-compose logs -f $service"
-	docker-compose logs -f $service
+	Write-Host "${DOCKER_COMPOSE} logs -f $service"
+	${DOCKER_COMPOSE} logs -f $service
 }
 
 
@@ -58,14 +63,14 @@ function od_shell {
 	if ($service -eq "opsi-server") {
 		$cmd = "zsh"
 	}
-	Write-Host "docker-compose exec $service $cmd"
-	docker-compose exec $service $cmd
+	Write-Host "${DOCKER_COMPOSE} exec $service $cmd"
+	${DOCKER_COMPOSE} exec $service $cmd
 }
 
 
 function od_update {
-	Write-Host "docker-compose pull"
-	docker-compose pull
+	Write-Host "${DOCKER_COMPOSE} pull"
+	${DOCKER_COMPOSE} pull
 	if ($? -eq $false) {
 		exit 1
 	}
@@ -80,7 +85,7 @@ function od_export_images {
 		Remove-Item -Path $archive
 	}
 	$images = @()
-	$out = docker-compose config
+	$out = ${DOCKER_COMPOSE} config
 	$pattern = "\s*image:\s*([^\s]+)\s*"
 	$matches = [regex]::Matches($out, $pattern)
 	foreach ($match in $matches) {
