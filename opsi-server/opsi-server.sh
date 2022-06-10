@@ -5,6 +5,9 @@ IMAGE_NAME="opsi-server"
 DEFAULT_SERVICE="opsi-server"
 [ -z $REGISTRY ] && REGISTRY="docker.io"
 [ -z $REGISTRY_PATH ] && REGISTRY_PATH="uibmz"
+[ -z $REGISTRY_USERNAME ] && REGISTRY_USERNAME=""
+[ -z $DOCKER_HUB_ACCESS_TOKEN ] || REGISTRY_PASSWORD="${DOCKER_HUB_ACCESS_TOKEN}"
+[ -z $REGISTRY_PASSWORD ] && REGISTRY_PASSWORD=""
 [ -z $OPSI_VERSION ] && OPSI_VERSION="4.2"
 [ -z $OPSI_BRANCH ] && OPSI_BRANCH="experimental"
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
@@ -29,8 +32,13 @@ function od_publish {
 	[ -z $prefix ] || prefix="${prefix}/"
 	prefix="${prefix}${REGISTRY_PATH}"
 
+	auth=""
+	[ -z $REGISTRY_USERNAME ] || auth="${auth} -u \"${REGISTRY_USERNAME}\""
+	[ -z $REGISTRY_PASSWORD ] || auth="${auth} -p \"${REGISTRY_PASSWORD}\""
+
 	echo "Publish ${IMAGE_NAME}:${IMAGE_TAG} in '${prefix}'" 1>&2
-	docker login ${REGISTRY}
+
+	docker login ${REGISTRY} ${auth}
 
 	opsiconfd_version=$(docker run -e OPSI_HOSTNAME=opsiconfd.opsi.org --entrypoint /usr/bin/opsiconfd "${IMAGE_NAME}:${IMAGE_TAG}" --version | cut -d' ' -f1)
 

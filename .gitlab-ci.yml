@@ -11,12 +11,13 @@ build_and_publish:docker_image_dockerhub:
   script:
     - apt-get update
     - apt-get --yes install docker.io
-    - export REGISTRY="uibmz/opsi-server"
+    - export REGISTRY="docker.io"
+    - export REGISTRY_PATH="/uibmz"
+    - export REGISTRY_USERNAME="uibmz"
     - export OPSI_VERSION="4.2"
     - export OPSI_BRANCH="development"
-    - docker login -u uibmz -p $DOCKER_HUB_ACCESS_TOKEN
-    - ./dev.sh build --no-cache
-    - ./dev.sh publish
+    - ./opsi-server/opsi-server.sh build --no-cache
+    - ./opsi-server/opsi-server.sh publish
 
 build_and_publish:docker_image_internal:
   stage: build_and_publish
@@ -26,8 +27,9 @@ build_and_publish:docker_image_internal:
   script:
     - apt-get update
     - apt-get --yes install docker.io
-    - export REGISTRY="docker.uib.gmbh/opsi"
+    - export REGISTRY="docker.uib.gmbh"
+    - export REGISTRY_PATH="/opsi"
     - export OPSI_VERSION="4.2"
     - export OPSI_BRANCH="development"
-    - ./dev.sh build --no-cache
-    - ./dev.sh publish
+    - ./opsi-server/opsi-server.sh build --no-cache
+    - ./opsi-server/opsi-server.sh publish
