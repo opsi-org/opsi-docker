@@ -33,7 +33,7 @@ function od_publish {
 	prefix="${prefix}${REGISTRY_PATH##*/}"
 
 	auth=""
-	[ -z $REGISTRY_USERNAME ] || auth="${auth} -u \"${REGISTRY_USERNAME}\""
+	[ -z $REGISTRY_USERNAME ] || auth="${auth} --username \"${REGISTRY_USERNAME}\""
 	[ -z $REGISTRY_PASSWORD ] || auth="${auth} --password-stdin"
 
 	echo "Publish ${IMAGE_NAME}:${IMAGE_TAG} in '${prefix}'" 1>&2
