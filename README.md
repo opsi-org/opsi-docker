@@ -4,6 +4,11 @@ This image can be used to set up an opsi config-server or an opsi depot-server.
 The only supported depot protocol is WebDAV, there is no Samba support included in this image.
 File backend is not supported, you will need an opsi mysql module license.
 
+All files mentioned here and the full README are available in the following GitHub repository:
+
+https://github.com/opsi-org/opsi-docker
+
+
 # Docker Compose
 The image is meant to be used with Docker Compose.
 Minimum required Docker Compose version is 1.17.0 with Docker engine 17.09.0+.

@@ -52,12 +52,12 @@ services:
   grafana:
     image: grafana/grafana:latest
     <<: *restart-policy
-    ports:
-      - "3000:3000"
+    #ports:
+    #  - "3000:3000"
     environment:
       <<: [*common-variables, *common-grafana-variables]
       GF_INSTALL_PLUGINS: grafana-simple-json-datasource
-      #GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s:%(http_port)s/grafana"
+      GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s:%(http_port)s/grafana"
     volumes:
       - grafana_data:/var/lib/grafana
 
@@ -78,7 +78,7 @@ services:
       MYSQL_HOST: mysql
       REDIS_HOST: redis
       GRAFANA_HOST: grafana
-      OPSI_ADMIN_PASSWORD: adminuser
+      OPSI_ADMIN_PASSWORD: vhahd8usaz
       OPSI_ROOT_PASSWORD:
       # configserver / depotserver
       OPSI_HOST_ROLE: configserver
@@ -88,7 +88,7 @@ services:
       OPSI_SERVICE_ADDRESS:
       OPSI_HOST_KEY:
       # opsconfd config
-      OPSICONFD_GRAFANA_EXTERNAL_URL: http://grafana:3000
+      OPSICONFD_GRAFANA_EXTERNAL_URL: /grafana
       OPSICONFD_LOG_LEVEL: 6
       OPSICONFD_LOG_LEVEL_FILE: 4
     volumes:
