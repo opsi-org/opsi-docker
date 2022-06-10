@@ -3,7 +3,8 @@
 PROJECT_NAME="opsi-server"
 IMAGE_NAME="opsi-server"
 DEFAULT_SERVICE="opsi-server"
-[ -z $REGISTRY ] && REGISTRY="docker.uib.gmbh/opsi"
+[ -z $REGISTRY ] && REGISTRY="docker.io"
+[ -z $REGISTRY_PATH ] && REGISTRY_PATH="uibmz"
 [ -z $OPSI_VERSION ] && OPSI_VERSION="4.2"
 [ -z $OPSI_BRANCH ] && OPSI_BRANCH="experimental"
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
@@ -24,16 +25,22 @@ function od_build {
 
 
 function od_publish {
-	echo "Publish ${IMAGE_NAME}:${IMAGE_TAG} in ${REGISTRY}" 1>&2
+	prefix="${REGISTRY}"
+	[ -z $prefix ] || prefix="${prefix}/"
+	prefix="${prefix}${REGISTRY_PATH}"
+
+	echo "Publish ${IMAGE_NAME}:${IMAGE_TAG} in '${prefix}'" 1>&2
+	docker login ${REGISTRY}
+
 	opsiconfd_version=$(docker run -e OPSI_HOSTNAME=opsiconfd.opsi.org --entrypoint /usr/bin/opsiconfd "${IMAGE_NAME}:${IMAGE_TAG}" --version | cut -d' ' -f1)
 
-	docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-	docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${REGISTRY}/${IMAGE_NAME}:${opsiconfd_version}"
-	#docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${REGISTRY}/${IMAGE_NAME}:${OPSI_VERSION}-${OPSI_BRANCH}-latest"
+	docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${IMAGE_TAG}"
+	docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${opsiconfd_version}"
+	#docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${OPSI_VERSION}-${OPSI_BRANCH}-latest"
 
-	docker push -a "${REGISTRY}/${IMAGE_NAME}"
+	docker push -a "${prefix}/${IMAGE_NAME}"
 
-	docker images "${REGISTRY}/${IMAGE_NAME}"
+	docker images "${prefix}/${IMAGE_NAME}"
 }
 
 
