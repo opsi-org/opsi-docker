@@ -30,15 +30,15 @@ function od_build {
 function od_publish {
 	prefix="${REGISTRY}"
 	[ -z $prefix ] || prefix="${prefix}/"
-	prefix="${prefix}${REGISTRY_PATH}"
+	prefix="${prefix}${REGISTRY_PATH##*/}"
 
 	auth=""
 	[ -z $REGISTRY_USERNAME ] || auth="${auth} -u \"${REGISTRY_USERNAME}\""
-	[ -z $REGISTRY_PASSWORD ] || auth="${auth} -p \"${REGISTRY_PASSWORD}\""
+	[ -z $REGISTRY_PASSWORD ] || auth="${auth} --password-stdin"
 
 	echo "Publish ${IMAGE_NAME}:${IMAGE_TAG} in '${prefix}'" 1>&2
 
-	docker login ${REGISTRY} ${auth}
+	docker login ${REGISTRY} ${auth} <<< "${REGISTRY_PASSWORD}"
 
 	opsiconfd_version=$(docker run -e OPSI_HOSTNAME=opsiconfd.opsi.org --entrypoint /usr/bin/opsiconfd "${IMAGE_NAME}:${IMAGE_TAG}" --version | cut -d' ' -f1)
 
