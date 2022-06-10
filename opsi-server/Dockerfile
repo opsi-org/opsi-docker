@@ -22,7 +22,7 @@ ENV MYSQL_PASSWORD="opsi"
 ENV ROOT_PASSWORD=""
 ENV TFTPD_ARGS="-v --ipv4 --listen --foreground --blocksize 1024 --address :69 --secure /tftpboot"
 ENV OPSIPXECONFD_ARGS="--no-fork start"
-ENV OPSICONFD_ARGS="-l4"
+ENV OPSICONFD_ARGS=""
 ENV OPSICONFD_ADMIN_INTERFACE_TERMINAL_SHELL="/usr/bin/zsh"
 ENV OPSICONFD_GRAFANA_DATA_SOURCE_URL="https://opsi-server:4447"
 ENV TZ="Europe/Berlin"
@@ -76,6 +76,7 @@ RUN mkdir /data \
 	&& cp -a /root/.oh-my-zsh /var/lib/opsiconfd/home/.oh-my-zsh \
 	&& echo "cd /var/lib/opsi" >> /var/lib/opsiconfd/home/.zshrc \
 	&& chown -R opsiconfd:opsiadmin /var/lib/opsiconfd/home \
+	&& echo ". /entrypoint.sh set_environment_vars" >> /root/.bashrc \
 	&& echo ". /entrypoint.sh set_environment_vars" >> /root/.zshrc \
 	&& (rm /tmp/* || true)
 
