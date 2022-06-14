@@ -10,6 +10,7 @@ DEFAULT_SERVICE="opsi-server"
 [ -z $REGISTRY_PASSWORD ] && REGISTRY_PASSWORD=""
 [ -z $OPSI_VERSION ] && OPSI_VERSION="4.2"
 [ -z $OPSI_BRANCH ] && OPSI_BRANCH="experimental"
+[ -z $COMPOSE_URL ] && COMPOSE_URL="https://raw.githubusercontent.com/opsi-org/opsi-docker/opsi-server/devel/docker-compose.yml"
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
 
 DOCKER_COMPOSE="docker-compose"
@@ -65,7 +66,18 @@ function od_prune {
 }
 
 
+function od_download_compose {
+	echo "Download docker-compose.yml" 1>&2
+	if ! wget "${COMPOSE_URL}" --no-verbose -O docker-compose.yml; then
+		[ -e docker-compose.yml ] && rm docker-compose.yml
+		echo "Download failed" 1>&2
+		exit 1
+	fi
+}
+
+
 function od_start {
+	[ -e "docker-compose.yml" ] || od_download_compose
 	echo "Start containers" 1>&2
 	echo "${DOCKER_COMPOSE} up -d" 1>&2
 	${DOCKER_COMPOSE} up -d
@@ -166,6 +178,7 @@ function od_usage {
 	echo "Usage: $0 <command>"
 	echo ""
 	echo "Commands:"
+	echo "  download-compose          Download docker-compose.yml from repository."
 	echo "  edit                      Edit docker-compose.yml."
 	echo "  start                     Start all containers."
 	echo "  status                    Show running containers."
@@ -186,6 +199,9 @@ function od_usage {
 
 
 case $1 in
+	"download-compose")
+		od_download_compose
+	;;
 	"edit")
 		od_edit
 	;;

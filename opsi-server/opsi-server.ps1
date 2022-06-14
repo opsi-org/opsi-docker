@@ -2,6 +2,7 @@
 $PROJECT_NAME = "opsi-server"
 $DEFAULT_SERVICE = "opsi-server"
 $DOCKER_COMPOSE = "docker-compose"
+$COMPOSE_URL = "https://raw.githubusercontent.com/opsi-org/opsi-docker/opsi-server/devel/docker-compose.yml"
 
 if ((Get-Command $DOCKER_COMPOSE -ErrorAction SilentlyContinue) -eq $null) {
 	$DOCKER_COMPOSE = "docker compose"
@@ -18,28 +19,42 @@ function od_prune {
 	Write-Host ""
 	if ($key -eq "Y" -Or $key -eq "y") {
 		Write-Host "${DOCKER_COMPOSE} down -d"
-		${DOCKER_COMPOSE} down -v
+		& ${DOCKER_COMPOSE} down -v
+	}
+}
+
+
+function od_download_compose {
+	Write-Host "Download docker-compose.yml"
+	try {
+		Invoke-WebRequest -Uri $COMPOSE_URL -OutFile docker-compose.yml
+	} catch {
+		Write-Host "Download failed: ${_}"
+		exit 1
 	}
 }
 
 
 function od_start {
+	if (-not(Test-Path -Path docker-compose.yml -PathType Leaf)) {
+		od_download_compose
+	}
 	Write-Host "Start containers"
 	Write-Host "${DOCKER_COMPOSE} up -d"
-	${DOCKER_COMPOSE} up -d
+	& ${DOCKER_COMPOSE} up -d
 }
 
 
 function od_status {
 	Write-Host "${DOCKER_COMPOSE} ps"
-	${DOCKER_COMPOSE} ps
+	& ${DOCKER_COMPOSE} ps
 }
 
 
 function od_stop {
 	Write-Host "Stop containers"
 	Write-Host "${DOCKER_COMPOSE} stop"
-	${DOCKER_COMPOSE} stop
+	& ${DOCKER_COMPOSE} stop
 }
 
 
@@ -48,7 +63,7 @@ function od_logs {
 		$service
 	)
 	Write-Host "${DOCKER_COMPOSE} logs -f $service"
-	${DOCKER_COMPOSE} logs -f $service
+	& ${DOCKER_COMPOSE} logs -f $service
 }
 
 
@@ -64,13 +79,13 @@ function od_shell {
 		$cmd = "zsh"
 	}
 	Write-Host "${DOCKER_COMPOSE} exec $service $cmd"
-	${DOCKER_COMPOSE} exec $service $cmd
+	& ${DOCKER_COMPOSE} exec $service $cmd
 }
 
 
 function od_update {
 	Write-Host "${DOCKER_COMPOSE} pull"
-	${DOCKER_COMPOSE} pull
+	& ${DOCKER_COMPOSE} pull
 	if ($? -eq $false) {
 		exit 1
 	}
@@ -85,7 +100,7 @@ function od_export_images {
 		Remove-Item -Path $archive
 	}
 	$images = @()
-	$out = ${DOCKER_COMPOSE} config
+	$out = & ${DOCKER_COMPOSE} config
 	$pattern = "\s*image:\s*([^\s]+)\s*"
 	$matches = [regex]::Matches($out, $pattern)
 	foreach ($match in $matches) {
@@ -158,6 +173,7 @@ function od_usage {
 	Write-Host "Usage: $(Split-Path -Path $PSCommandPath -Leaf) <command>"
 	Write-Host ""
 	Write-Host "Commands:"
+	Write-Host "  download-compose          Download docker-compose.yml from repository."
 	Write-Host "  edit                      Edit docker-compose.yml."
 	Write-Host "  start                     Start all containers."
 	Write-Host "  status                    Show running containers."
@@ -176,6 +192,9 @@ function od_usage {
 
 
 switch ($args[0]) {
+	"download-compose" {
+		od_download_compose
+	}
 	"edit" {
 		od_edit
 	}
