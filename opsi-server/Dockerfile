@@ -48,6 +48,7 @@ RUN apt-get update \
 		iputils-ping \
 		supervisor \
 		ca-certificates \
+		mariadb-client \
 	&& echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] ${OPSI_REPO} /" > /etc/apt/sources.list.d/opsi.list \
 	&& mkdir /usr/local/share/keyrings \
 	&& chmod 755 /usr/local/share/keyrings \
