@@ -9,7 +9,7 @@ DEFAULT_SERVICE="opsi-server"
 [ -z $DOCKER_HUB_ACCESS_TOKEN ] || REGISTRY_PASSWORD="${DOCKER_HUB_ACCESS_TOKEN}"
 [ -z $REGISTRY_PASSWORD ] && REGISTRY_PASSWORD=""
 [ -z $OPSI_VERSION ] && OPSI_VERSION="4.2"
-[ -z $OPSI_BRANCH ] && OPSI_BRANCH="experimental"
+[ -z $OPSI_BRANCH ] && OPSI_BRANCH="testing"
 [ -z $COMPOSE_URL ] && COMPOSE_URL="https://raw.githubusercontent.com/opsi-org/opsi-docker/opsi-server/devel/docker-compose.yml"
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
 
