@@ -83,14 +83,17 @@ function od_shell {
 }
 
 
-function od_update {
+function od_upgrade {
 	Write-Host "${DOCKER_COMPOSE} pull"
 	& ${DOCKER_COMPOSE} pull
 	if ($? -eq $false) {
 		exit 1
 	}
-	od_stop
-	od_start
+	${DOCKER_COMPOSE} pull || exit 1
+	Write-Host "${DOCKER_COMPOSE} down"
+	& ${DOCKER_COMPOSE} down
+	Write-Host "${DOCKER_COMPOSE} up --force-recreate -d"
+	& ${DOCKER_COMPOSE} up --force-recreate -d
 }
 
 
@@ -180,7 +183,7 @@ function od_usage {
 	Write-Host "  stop                      Stop all containers."
 	Write-Host "  logs [service]            Attach to container logs (all logs or supplied service)."
 	Write-Host "  shell [service]           Exexute a shell in a running container (default service: ${DEFAULT_SERVICE})."
-	Write-Host "  update                    Update and restart all containers."
+	Write-Host "  upgrade                   Upgrade and restart all containers."
 	Write-Host "  open-volumes              Open volumes directory in explorer."
 	Write-Host "  inspect [service]         Show detailed container informations (default service: ${DEFAULT_SERVICE})."
 	Write-Host "  diff [service]            Show container's filesystem changes (default service: ${DEFAULT_SERVICE})."
@@ -213,8 +216,8 @@ switch ($args[0]) {
 	"shell" {
 		od_shell $args[1]
 	}
-	"update" {
-		od_update
+	"upgrade" {
+		od_upgrade
 	}
 	"open-volumes" {
 		od_open_volumes

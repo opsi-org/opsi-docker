@@ -2,6 +2,10 @@
 $PROJECT_NAME = "opsi-client-debian-xfce"
 $DEFAULT_SERVICE = "opsi-client-debian-xfce"
 
+if ((Get-Command $DOCKER_COMPOSE -ErrorAction SilentlyContinue) -eq $null) {
+	$DOCKER_COMPOSE = "docker compose"
+}
+
 $context_dir = $(Split-Path -Path $PSCommandPath -Parent)
 Set-Location -Path $context_dir
 
@@ -12,29 +16,29 @@ function od_prune {
 	$key = $Host.UI.RawUI.ReadKey().Character
 	Write-Host ""
 	if ($key -eq "Y" -Or $key -eq "y") {
-		Write-Host "docker-compose down -d"
-		docker-compose down -v
+		Write-Host "${DOCKER_COMPOSE} down -d"
+		& ${DOCKER_COMPOSE} down -v
 	}
 }
 
 
 function od_start {
 	Write-Host "Start containers"
-	Write-Host "docker-compose up -d"
-	docker-compose up -d
+	Write-Host "${DOCKER_COMPOSE} up -d"
+	& ${DOCKER_COMPOSE} up -d
 }
 
 
 function od_status {
-	Write-Host "docker-compose ps"
-	docker-compose ps
+	Write-Host "${DOCKER_COMPOSE} ps"
+	& ${DOCKER_COMPOSE} ps
 }
 
 
 function od_stop {
 	Write-Host "Stop containers"
-	Write-Host "docker-compose stop"
-	docker-compose stop
+	Write-Host "${DOCKER_COMPOSE} stop"
+	& ${DOCKER_COMPOSE} stop
 }
 
 
@@ -42,8 +46,8 @@ function od_logs {
 	param (
 		$service
 	)
-	Write-Host "docker-compose logs -f $service"
-	docker-compose logs -f $service
+	Write-Host "${DOCKER_COMPOSE} logs -f $service"
+	& ${DOCKER_COMPOSE} logs -f $service
 }
 
 
@@ -58,19 +62,22 @@ function od_shell {
 	if ($service -eq "opsi-server") {
 		$cmd = "zsh"
 	}
-	Write-Host "docker-compose exec $service $cmd"
-	docker-compose exec $service $cmd
+	Write-Host "${DOCKER_COMPOSE} exec $service $cmd"
+	& ${DOCKER_COMPOSE} exec $service $cmd
 }
 
 
-function od_update {
+function od_upgrade {
 	Write-Host "docker-compose pull"
-	docker-compose pull
+	& ${DOCKER_COMPOSE} pull
 	if ($? -eq $false) {
 		exit 1
 	}
-	od_stop
-	od_start
+	${DOCKER_COMPOSE} pull || exit 1
+	Write-Host "${DOCKER_COMPOSE} down"
+	& ${DOCKER_COMPOSE} down
+	Write-Host "${DOCKER_COMPOSE} up --force-recreate -d"
+	& ${DOCKER_COMPOSE} up --force-recreate -d
 }
 
 
@@ -80,7 +87,7 @@ function od_export_images {
 		Remove-Item -Path $archive
 	}
 	$images = @()
-	$out = docker-compose config
+	$out = & ${DOCKER_COMPOSE} config
 	$pattern = "\s*image:\s*([^\s]+)\s*"
 	$matches = [regex]::Matches($out, $pattern)
 	foreach ($match in $matches) {
@@ -159,7 +166,7 @@ function od_usage {
 	Write-Host "  stop                      Stop all containers."
 	Write-Host "  logs [service]            Attach to container logs (all logs or supplied service)."
 	Write-Host "  shell [service]           Exexute a shell in a running container (default service: ${DEFAULT_SERVICE})."
-	Write-Host "  update                    Update and restart all containers."
+	Write-Host "  upgrade                   Upgrade and restart all containers."
 	Write-Host "  open-volumes              Open volumes directory in explorer."
 	Write-Host "  inspect [service]         Show detailed container informations (default service: ${DEFAULT_SERVICE})."
 	Write-Host "  diff [service]            Show container's filesystem changes (default service: ${DEFAULT_SERVICE})."
@@ -189,8 +196,8 @@ switch ($args[0]) {
 	"shell" {
 		od_shell $args[1]
 	}
-	"update" {
-		od_update
+	"upgrade" {
+		od_upgrade
 	}
 	"open-volumes" {
 		od_open_volumes

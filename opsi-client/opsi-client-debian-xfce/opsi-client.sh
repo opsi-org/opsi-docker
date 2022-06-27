@@ -8,6 +8,9 @@ DEFAULT_SERVICE="opsi-client-debian-xfce"
 [ -z $OPSI_BRANCH ] && OPSI_BRANCH="experimental"
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
 
+DOCKER_COMPOSE="docker-compose"
+which $DOCKER_COMPOSE >/dev/null || DOCKER_COMPOSE="docker compose"
+
 cd $(dirname "${BASH_SOURCE[0]}")
 
 
@@ -40,35 +43,35 @@ function od_prune {
 	read -p "Are you sure? (y/n): " -n 1 -r
 	echo ""
 	if [[ $REPLY =~ ^[Yy]$ ]]; then
-		echo "docker-compose down -v" 1>&2
-		docker-compose down -v
+		echo "${DOCKER_COMPOSE} down -v" 1>&2
+		${DOCKER_COMPOSE} down -v
 	fi
 }
 
 
 function od_start {
 	echo "Start containers" 1>&2
-	echo "docker-compose up -d" 1>&2
-	docker-compose up -d
+	echo "${DOCKER_COMPOSE} up -d" 1>&2
+	${DOCKER_COMPOSE} up -d
 }
 
 
 function od_status {
-	echo "docker-compose ps"
-	docker-compose ps
+	echo "${DOCKER_COMPOSE} ps"
+	${DOCKER_COMPOSE} ps
 }
 
 
 function od_stop {
 	echo "Stop containers" 1>&2
-	echo "docker-compose stop" 1>&2
-	docker-compose stop
+	echo "${DOCKER_COMPOSE} stop" 1>&2
+	${DOCKER_COMPOSE} stop
 }
 
 
 function od_logs {
-	echo "docker-compose logs -f $1" 1>&2
-	docker-compose logs -f $1
+	echo "${DOCKER_COMPOSE} logs -f $1" 1>&2
+	${DOCKER_COMPOSE} logs -f $1
 }
 
 
@@ -77,23 +80,25 @@ function od_shell {
 	cmd="sh"
 	[ -z $service ] && service=$DEFAULT_SERVICE
 	[ $service = "opsi-server" ] && cmd="zsh"
-	echo "docker-compose exec $service $cmd" 1>&2
-	docker-compose exec $service $cmd
+	echo "${DOCKER_COMPOSE} exec $service $cmd" 1>&2
+	${DOCKER_COMPOSE} exec $service $cmd
 }
 
 
-function od_update {
-	echo "docker-compose pull" 1>&2
-	docker-compose pull || exit 1
-	od_stop
-	od_start
+function od_upgrade {
+	echo "${DOCKER_COMPOSE} pull" 1>&2
+	${DOCKER_COMPOSE} pull || exit 1
+	echo "${DOCKER_COMPOSE} down" 1>&2
+	${DOCKER_COMPOSE} down
+	echo "${DOCKER_COMPOSE} up --force-recreate -d" 1>&2
+	${DOCKER_COMPOSE} up --force-recreate -d
 }
 
 
 function od_export_images {
 	archive="${PROJECT_NAME}-images.tar.gz"
 	[ -e "${archive}" ] && rm "${archive}"
-	images=( $(docker-compose config | grep "image:" | sed s'/.*image:\s*//' | tr '\n' ' ') )
+	images=( $(${DOCKER_COMPOSE} config | grep "image:" | sed s'/.*image:\s*//' | tr '\n' ' ') )
 	if [ ${#images[@]} -gt 0 ]; then
 		echo "Exporting images ${images[@]} to ${archive}" 1>&2
 		echo "docker save ${images[@]} | gzip > \"${archive}\"" 1>&2
@@ -153,7 +158,7 @@ function od_usage {
 	echo "  stop                      Stop all containers."
 	echo "  logs [service]            Attach to container logs (all logs or supplied service)."
 	echo "  shell [service]           Exexute a shell in a running container (default service: ${DEFAULT_SERVICE})."
-	echo "  update                    Update and restart all containers."
+	echo "  upgrade                   Upgrade and restart all containers."
 	echo "  open-volumes              Open volumes directory in explorer."
 	echo "  inspect [service]         Show detailed container informations (default service: ${DEFAULT_SERVICE})."
 	echo "  diff [service]            Show container's filesystem changes (default service: ${DEFAULT_SERVICE})."
@@ -185,8 +190,8 @@ case $1 in
 	"shell")
 		od_shell $2
 	;;
-	"update")
-		od_update
+	"upgrade")
+		od_upgrade
 	;;
 	"open-volumes")
 		od_open_volumes

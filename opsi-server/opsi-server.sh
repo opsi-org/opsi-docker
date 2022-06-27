@@ -113,11 +113,13 @@ function od_shell {
 }
 
 
-function od_update {
+function od_upgrade {
 	echo "${DOCKER_COMPOSE} pull" 1>&2
 	${DOCKER_COMPOSE} pull || exit 1
-	od_stop
-	od_start
+	echo "${DOCKER_COMPOSE} down" 1>&2
+	${DOCKER_COMPOSE} down
+	echo "${DOCKER_COMPOSE} up --force-recreate -d" 1>&2
+	${DOCKER_COMPOSE} up --force-recreate -d
 }
 
 
@@ -185,7 +187,7 @@ function od_usage {
 	echo "  stop                      Stop all containers."
 	echo "  logs [service]            Attach to container logs (all logs or supplied service)."
 	echo "  shell [service]           Exexute a shell in a running container (default service: ${DEFAULT_SERVICE})."
-	echo "  update                    Update and restart all containers."
+	echo "  upgrade                   Upgrade and restart all containers."
 	echo "  open-volumes              Open volumes directory in explorer."
 	echo "  inspect [service]         Show detailed container informations (default service: ${DEFAULT_SERVICE})."
 	echo "  diff [service]            Show container's filesystem changes (default service: ${DEFAULT_SERVICE})."
@@ -220,8 +222,8 @@ case $1 in
 	"shell")
 		od_shell $2
 	;;
-	"update")
-		od_update
+	"upgrade")
+		od_upgrade
 	;;
 	"open-volumes")
 		od_open_volumes
