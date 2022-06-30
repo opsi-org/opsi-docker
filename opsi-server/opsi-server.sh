@@ -11,6 +11,7 @@ DEFAULT_SERVICE="opsi-server"
 [ -z $OPSI_VERSION ] && OPSI_VERSION="4.2"
 [ -z $OPSI_BRANCH ] && OPSI_BRANCH="testing"
 [ -z $COMPOSE_URL ] && COMPOSE_URL="https://raw.githubusercontent.com/opsi-org/opsi-docker/opsi-server/devel/docker-compose.yml"
+[ -z $ADDITIONAL_TAGS ] && ADDITIONAL_TAGS=""
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
 
 DOCKER_COMPOSE="docker-compose"
@@ -47,7 +48,11 @@ function od_publish {
 
 	docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${IMAGE_TAG}"
 	docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${opsiconfd_version}"
-	#docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${OPSI_VERSION}-${OPSI_BRANCH}-latest"
+	if [ ! -z $ADDITIONAL_TAGS ]; then
+		for tag in $ADDITIONAL_TAGS; do
+			docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${tag}"
+		done
+	fi
 
 	docker push -a "${prefix}/${IMAGE_NAME}"
 

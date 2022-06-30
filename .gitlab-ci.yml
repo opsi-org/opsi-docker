@@ -3,33 +3,38 @@ image: debian:bullseye
 stages:
   - build_and_publish
 
-build_and_publish:docker_image_dockerhub:
+.install_tools: &install_tools |
+  export DEBIAN_FRONTEND=noninteractive
+  - apt-get update
+  - apt-get --yes install docker.io
+
+build_and_publish:docker_image_dockerhub:testing:
   stage: build_and_publish
   when: manual
   only:
     - tags
   script:
-    - apt-get update
-    - apt-get --yes install docker.io
+    - *install_tools
     - export REGISTRY="docker.io"
     - export REGISTRY_PATH="/uibmz"
     - export REGISTRY_USERNAME="uibmz"
     - export OPSI_VERSION="4.2"
-    - export OPSI_BRANCH="development"
+    - export OPSI_BRANCH="testing"
+    - export ADDITIONAL_TAGS="4.2"
     - ./opsi-server/opsi-server.sh build --no-cache
     - ./opsi-server/opsi-server.sh publish
 
-build_and_publish:docker_image_internal:
+build_and_publish:docker_image_internal:testing:
   stage: build_and_publish
   #when: manual
   only:
     - tags
   script:
-    - apt-get update
-    - apt-get --yes install docker.io
+    - *install_tools
     - export REGISTRY="docker.uib.gmbh"
     - export REGISTRY_PATH="/opsi"
     - export OPSI_VERSION="4.2"
-    - export OPSI_BRANCH="development"
+    - export OPSI_BRANCH="testing"
+    - export ADDITIONAL_TAGS="4.2"
     - ./opsi-server/opsi-server.sh build --no-cache
     - ./opsi-server/opsi-server.sh publish
