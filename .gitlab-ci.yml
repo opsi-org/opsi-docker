@@ -5,8 +5,8 @@ stages:
 
 .install_tools: &install_tools |
   export DEBIAN_FRONTEND=noninteractive
-  - apt-get update
-  - apt-get --yes install docker.io
+  apt-get update
+  apt-get --yes install docker.io
 
 build_and_publish:docker_image_dockerhub:testing:
   stage: build_and_publish
