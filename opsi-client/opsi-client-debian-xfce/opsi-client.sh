@@ -123,7 +123,7 @@ function od_import_images {
 
 
 function od_open_volumes {
-	sudo sleep 1
+	sudo sleep 0.1 # to get auth
 	sudo xdg-open /var/lib/docker/volumes >/dev/null 2>&1 &
 }
 
