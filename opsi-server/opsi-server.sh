@@ -46,16 +46,15 @@ function od_publish {
 
 	opsiconfd_version=$(docker run -e OPSI_HOSTNAME=opsiconfd.opsi.org --entrypoint /usr/bin/opsiconfd "${IMAGE_NAME}:${IMAGE_TAG}" --version | cut -d' ' -f1)
 
-	docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${IMAGE_TAG}"
-	docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${opsiconfd_version}"
-	if [ ! -z $ADDITIONAL_TAGS ]; then
-		for tag in $ADDITIONAL_TAGS; do
-			docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${tag}"
-		done
-	fi
+	for tag in ${IMAGE_TAG} ${opsiconfd_version} ${ADDITIONAL_TAGS}; do
+		echo docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${tag}"
+		docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${tag}"
+	done
 
+	echo docker push -a "${prefix}/${IMAGE_NAME}"
 	docker push -a "${prefix}/${IMAGE_NAME}"
 
+	echo docker images "${prefix}/${IMAGE_NAME}"
 	docker images "${prefix}/${IMAGE_NAME}"
 }
 
