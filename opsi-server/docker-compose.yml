@@ -52,8 +52,6 @@ services:
   grafana:
     image: grafana/grafana:latest
     <<: *restart-policy
-    #ports:
-    #  - "3000:3000"
     environment:
       <<: [*common-variables, *common-grafana-variables]
       GF_INSTALL_PLUGINS: grafana-simple-json-datasource
