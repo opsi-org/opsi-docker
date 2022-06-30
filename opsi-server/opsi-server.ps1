@@ -89,7 +89,6 @@ function od_upgrade {
 	if ($? -eq $false) {
 		exit 1
 	}
-	${DOCKER_COMPOSE} pull || exit 1
 	Write-Host "${DOCKER_COMPOSE} down"
 	& ${DOCKER_COMPOSE} down
 	Write-Host "${DOCKER_COMPOSE} up --force-recreate -d"
