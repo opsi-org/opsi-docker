@@ -18,6 +18,7 @@ build_and_publish:docker_image_dockerhub:testing:
     - export REGISTRY="docker.io"
     - export REGISTRY_PATH="/uibmz"
     - export REGISTRY_USERNAME="uibmz"
+    - export REGISTRY_PASSWORD="${DOCKER_HUB_ACCESS_TOKEN}"
     - export OPSI_VERSION="4.2"
     - export OPSI_BRANCH="testing"
     - export ADDITIONAL_TAGS="4.2"
