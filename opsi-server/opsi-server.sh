@@ -35,7 +35,7 @@ function od_publish {
 
 	auth=""
 	if [ ! -z $REGISTRY_USERNAME ]; then
-		auth="${auth} --username \"${REGISTRY_USERNAME}\""
+		auth="${auth} --username ${REGISTRY_USERNAME}"
 		[ -z $REGISTRY_PASSWORD ] || auth="${auth} --password-stdin"
 	fi
 
