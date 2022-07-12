@@ -90,7 +90,7 @@ function init_volumes {
 			echo "Move ${src}" 1>&2
 			set return_val=1
 			if [ -e "${dst}" ]; then
-				rm -r "${src}"
+				rm --one-file-system -r "${src}"
 				ln -s "${dst}" "${src}"
 			else
 				mv "${src}" "${dst}"
