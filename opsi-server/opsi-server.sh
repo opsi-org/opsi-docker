@@ -42,7 +42,7 @@ function od_publish {
 	echo "Publish ${IMAGE_NAME}:${IMAGE_TAG} in '${prefix}'" 1>&2
 
 	set -e
-	docker login ${REGISTRY} ${auth} <<< "${REGISTRY_PASSWORD}"
+	[ -z ${auth} ] || docker login ${REGISTRY} ${auth} <<< "${REGISTRY_PASSWORD}"
 
 	opsiconfd_version=$(docker run -e OPSI_HOSTNAME=opsiconfd.opsi.org --entrypoint /usr/bin/opsiconfd "${IMAGE_NAME}:${IMAGE_TAG}" --version | cut -d' ' -f1)
 
