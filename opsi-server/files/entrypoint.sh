@@ -89,15 +89,20 @@ function init_volumes {
 		if [ ! -L "${src}" ]; then
 			echo "Move ${src}" 1>&2
 			set return_val=1
-			if [ -e "${dst}" ]; then
-				rm --one-file-system -r "${src}"
-				ln -s "${dst}" "${src}"
-			else
-				mv "${src}" "${dst}"
-				ln -s "${dst}" "${src}"
-				chown opsiconfd:opsiadmin "${dst}"
-				chmod 770 "${dst}"
+			if [ -d "${src}" ]; then
+				# Moving sub directories to allow mounts below dst
+				[ -e "${dst}" ] || mkdir "${dst}"
+				for entry in "${src}"/*; do
+					name=$(basename $entry)
+					if [ ! -e "${dst}/${name}" ]; then
+						mv $entry "${dst}/${name}"
+					fi
+				done
 			fi
+			rm --one-file-system -r "${src}"
+			ln -s "${dst}" "${src}"
+			chown opsiconfd:opsiadmin "${dst}"
+			chmod 770 "${dst}"
 		fi
 	done
 	chmod -R o+rX /data/tftpboot
