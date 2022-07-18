@@ -8,7 +8,7 @@ All files mentioned here and the full README are available in the following GitH
 
 https://github.com/opsi-org/opsi-docker
 
-# Quickstart
+# Quick start
 ```
 git clone https://github.com/opsi-org/opsi-docker.git
 cd opsi-docker/opsi-server
