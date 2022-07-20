@@ -10,7 +10,7 @@ stages:
 
 build_and_publish:docker_image_dockerhub:testing:
   stage: build_and_publish
-  when: manual
+  # when: manual
   only:
     - tags
   script:
