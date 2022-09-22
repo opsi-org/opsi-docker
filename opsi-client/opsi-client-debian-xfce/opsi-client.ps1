@@ -1,6 +1,7 @@
 
 $PROJECT_NAME = "opsi-client-debian-xfce"
 $DEFAULT_SERVICE = "opsi-client-debian-xfce"
+$DOCKER_COMPOSE = "docker-compose"
 
 if ((Get-Command $DOCKER_COMPOSE -ErrorAction SilentlyContinue) -eq $null) {
 	$DOCKER_COMPOSE = "docker compose"
