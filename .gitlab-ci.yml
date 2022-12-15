@@ -33,7 +33,7 @@ docker_image_internal:
   script:
     - *install_tools
     - export REGISTRY="docker.uib.gmbh"
-    - export REGISTRY_PATH="/opsi
+    - export REGISTRY_PATH="/opsi"
     - export OPSI_VERSION="4.3"
     - export OPSI_BRANCH="development"
     - export ADDITIONAL_TAGS="4.3"
