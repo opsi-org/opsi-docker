@@ -60,7 +60,7 @@ services:
       - grafana_data:/var/lib/grafana
 
   opsi-server:
-    image: uibmz/opsi-server:4.2
+    image: uibmz/opsi-server:4.3
     #build: .
     <<: *restart-policy
     depends_on:

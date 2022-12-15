@@ -12,7 +12,7 @@ networks:
 services:
   opsi-client-debian-xfce:
     #build: .
-    image: opsi-client-debian-xfce:4.2-experimental
+    image: opsi-client-debian-xfce:4.3-experimental
     volumes:
       - home:/home
     ports:

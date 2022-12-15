@@ -111,7 +111,7 @@ function init_volumes {
 
 
 function setup_users {
-	echo "* Setup users" 1>&2
+	echo "* Setup users" 1>&2  # adminuser still needed?
 	if ! getent passwd adminuser >/dev/null 2>&1; then
 		echo "Create adminuser" 1>&2
 		useradd -u 1000 -d /data/adminuser -m -g opsiadmin -G opsifileadmins -s /usr/bin/zsh adminuser || true
@@ -227,6 +227,18 @@ function entrypoint {
 	if $run_set_rights; then
 		echo "* Run opsi-set-rights" 1>&2
 		opsi-set-rights
+	fi
+
+	if [ -n "$OPSICONFD_RESTORE_BACKUP_URL" ]; then
+		if [ -e /etc/opsi/docker_start_backup_restored]; then
+			echo "* OPSICONFD_RESTORE_BACKUP_URL is set, but marker /etc/opsi/docker_start_backup_restored found - skipping restore."
+		else
+			echo "* Getting backup from $OPSICONFD_RESTORE_BACKUP_URL and restoring."
+			wget $OPSICONFD_RESTORE_BACKUP_URL -o backupfile
+			opsiconfd --zeroconf=false --workers=1 --log-level-stderr=5 restore backupfile
+			rm -f backupfile
+			touch /etc/opsi/docker_start_backup_restored
+		fi
 	fi
 
 	echo "* Start supervisord" 1>&2

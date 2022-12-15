@@ -5,8 +5,8 @@ FROM debian:${DEBIAN_VERSION}
 LABEL maintainer="uib GmbH <info@uib.de>"
 
 ARG DEBIAN_VERSION=11
-ARG OPSI_VERSION=4.2
-ARG OPSI_BRANCH=testing
+ARG OPSI_VERSION=4.3
+ARG OPSI_BRANCH=development
 
 ENV OPSI_REPO="https://download.opensuse.org/repositories/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
 ENV OPSI_SERVICE_ADDRESS=""

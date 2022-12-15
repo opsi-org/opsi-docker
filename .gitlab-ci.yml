@@ -8,7 +8,7 @@ stages:
   apt-get update
   apt-get --yes install docker.io
 
-build_and_publish:docker_image_dockerhub:testing:
+docker_image_dockerhub:
   stage: build_and_publish
   # when: manual
   only:
@@ -19,23 +19,23 @@ build_and_publish:docker_image_dockerhub:testing:
     - export REGISTRY_PATH="/uibmz"
     - export REGISTRY_USERNAME="uibmz"
     - export REGISTRY_PASSWORD="${DOCKER_HUB_ACCESS_TOKEN}"
-    - export OPSI_VERSION="4.2"
-    - export OPSI_BRANCH="testing"
-    - export ADDITIONAL_TAGS="4.2"
+    - export OPSI_VERSION="4.3"
+    - export OPSI_BRANCH="development"
+    - export ADDITIONAL_TAGS="4.3"
     - ./opsi-server/opsi-server.sh build --no-cache
     - ./opsi-server/opsi-server.sh publish
 
-build_and_publish:docker_image_internal:testing:
+docker_image_internal:
   stage: build_and_publish
   #when: manual
-  only:
-    - tags
+#  only:
+#    - tags
   script:
     - *install_tools
     - export REGISTRY="docker.uib.gmbh"
-    - export REGISTRY_PATH="/opsi"
-    - export OPSI_VERSION="4.2"
-    - export OPSI_BRANCH="testing"
-    - export ADDITIONAL_TAGS="4.2"
+    - export REGISTRY_PATH="/nilsd"  # /opsi
+    - export OPSI_VERSION="4.3"
+    - export OPSI_BRANCH="development"
+    - export ADDITIONAL_TAGS="4.3"
     - ./opsi-server/opsi-server.sh build --no-cache
     - ./opsi-server/opsi-server.sh publish
