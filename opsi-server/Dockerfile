@@ -8,7 +8,8 @@ ARG DEBIAN_VERSION=11
 ARG OPSI_VERSION=4.3
 ARG OPSI_BRANCH=development
 
-ENV OPSI_REPO="https://download.opensuse.org/repositories/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
+# ENV OPSI_REPO="https://download.opensuse.org/repositories/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
+ENV OPSI_REPO="http://obs.uib.local:82/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
 ENV OPSI_SERVICE_ADDRESS=""
 ENV OPSI_HOST_ID=""
 ENV OPSI_HOST_KEY=""
