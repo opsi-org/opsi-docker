@@ -10,6 +10,7 @@ ARG OPSI_BRANCH=development
 
 # ENV OPSI_REPO="https://download.opensuse.org/repositories/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
 ENV OPSI_REPO="http://obs.uib.local:82/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
+ENV OLD_OPSI_REPO="https://download.opensuse.org/repositories/home:/uibmz:/opsi:/4.2:/testing/Debian_${DEBIAN_VERSION}/"
 ENV OPSI_SERVICE_ADDRESS=""
 ENV OPSI_HOST_ID=""
 ENV OPSI_HOST_KEY=""
@@ -51,6 +52,8 @@ RUN apt-get update \
 		ca-certificates \
 		mariadb-client \
 	&& echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] ${OPSI_REPO} /" > /etc/apt/sources.list.d/opsi.list \
+	# remove OLD_OPSI_REPO once all components are published in 4.3
+	&& echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] ${OLD_OPSI_REPO} /" >> /etc/apt/sources.list.d/opsi.list \
 	&& mkdir /usr/local/share/keyrings \
 	&& chmod 755 /usr/local/share/keyrings \
 	&& wget -nv ${OPSI_REPO}Release.key -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs.gpg \
