@@ -53,10 +53,11 @@ RUN apt-get update \
 		mariadb-client \
 	&& echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] ${OPSI_REPO} /" > /etc/apt/sources.list.d/opsi.list \
 	# remove OLD_OPSI_REPO once all components are published in 4.3
-	&& echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] ${OLD_OPSI_REPO} /" >> /etc/apt/sources.list.d/opsi.list \
+	&& echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs-old.gpg] ${OLD_OPSI_REPO} /" >> /etc/apt/sources.list.d/opsi.list \
 	&& mkdir /usr/local/share/keyrings \
 	&& chmod 755 /usr/local/share/keyrings \
 	&& wget -nv ${OPSI_REPO}Release.key -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs.gpg \
+	&& wget -nv ${OLD_OPSI_REPO}Release.key -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs-old.gpg \
 	&& apt-get --yes update \
 	&& OPSI_HOST_ID="opsiconfd.opsi.org" apt-get --yes install --no-install-recommends opsi-server-expert \
 	&& sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
