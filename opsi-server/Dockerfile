@@ -59,15 +59,13 @@ RUN apt-get update \
 	&& wget -nv ${OPSI_REPO}Release.key -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs.gpg \
 	&& wget -nv ${OLD_OPSI_REPO}Release.key -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs-old.gpg \
 	&& apt-get --yes update \
-	&& OPSI_HOST_ID="opsiconfd.opsi.org" apt-get --yes install --no-install-recommends opsiconfd \
-	&& ls -lah /etc/opsi/*\
 	&& OPSI_HOST_ID="opsiconfd.opsi.org" apt-get --yes install --no-install-recommends opsi-server-expert \
 	&& sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
 	&& locale-gen \
 	&& ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime && echo "${TZ}" > /etc/timezone \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& rm /etc/opsi/ssl/*
+	&& rm -f /etc/opsi/ssl/*
 
 COPY files/ /
 
