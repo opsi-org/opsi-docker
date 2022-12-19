@@ -111,7 +111,7 @@ function init_volumes {
 
 
 function setup_users {
-	echo "* Setup users" 1>&2  # adminuser still needed?
+	echo "* Setup users" 1>&2
 	if ! getent passwd adminuser >/dev/null 2>&1; then
 		echo "Create adminuser" 1>&2
 		useradd -u 1000 -d /data/adminuser -m -g opsiadmin -G opsifileadmins -s /usr/bin/zsh adminuser || true
@@ -200,7 +200,7 @@ function wait_for_redis {
 	done
 }
 
-function register_license {
+function fetch_license_file {
 	if [ -n "$OPSILICSRV_URL" -a -n "$OPSILICSRV_TOKEN" ]; then
 		echo "* Downloading license file" 1>&2
 		mkdir -p /etc/opsi/licenses
@@ -216,7 +216,7 @@ function handle_backup {
 			echo "* Getting backup from $OPSICONFD_RESTORE_BACKUP_URL and restoring."
 			wget $OPSICONFD_RESTORE_BACKUP_URL -O /tmp/backupfile
 			archive=$(tar -xvf /tmp/backupfile -C /tmp)
-			opsiconfd --zeroconf=false --workers=1 --log-level-stderr=5 restore "/tmp/$archive"
+			opsiconfd --log-level-stderr=5 restore "/tmp/${archive}"
 			rm -f backupfile "/tmp/$archive"
 			touch /etc/opsi/docker_start_backup_restored
 		fi
