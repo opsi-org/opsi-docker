@@ -251,7 +251,7 @@ function entrypoint {
 		opsi-set-rights
 	fi
 
-	register_license
+	fetch_license_file
 	handle_backup
 
 	echo "* Start supervisord" 1>&2
