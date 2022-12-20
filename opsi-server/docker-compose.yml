@@ -60,7 +60,7 @@ services:
       - grafana_data:/var/lib/grafana
 
   opsi-server:
-    image: uibmz/opsi-server:4.2
+    image: docker.uib.gmbh/opsi/opsi-server:4.3-development  # uibmz/opsi-server:4.3
     #build: .
     <<: *restart-policy
     depends_on:
@@ -89,5 +89,8 @@ services:
       OPSICONFD_GRAFANA_EXTERNAL_URL: /grafana
       OPSICONFD_LOG_LEVEL: 6
       OPSICONFD_LOG_LEVEL_FILE: 4
+      OPSICONFD_RESTORE_BACKUP_URL: ${OPSICONFD_RESTORE_BACKUP_URL:-}
+      OPSILICSRV_URL: ${OPSILICSRV_URL:-}
+      OPSILICSRV_TOKEN: ${OPSILICSRV_TOKEN:-}
     volumes:
       - opsi_data:/data

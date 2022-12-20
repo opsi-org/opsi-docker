@@ -5,10 +5,12 @@ FROM debian:${DEBIAN_VERSION}
 LABEL maintainer="uib GmbH <info@uib.de>"
 
 ARG DEBIAN_VERSION=11
-ARG OPSI_VERSION=4.2
-ARG OPSI_BRANCH=testing
+ARG OPSI_VERSION=4.3
+ARG OPSI_BRANCH=development
 
-ENV OPSI_REPO="https://download.opensuse.org/repositories/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
+# ENV OPSI_REPO="https://download.opensuse.org/repositories/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
+ENV OPSI_REPO="http://obs.uib.local:82/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
+ENV OLD_OPSI_REPO="https://download.opensuse.org/repositories/home:/uibmz:/opsi:/4.2:/testing/Debian_${DEBIAN_VERSION}/"
 ENV OPSI_SERVICE_ADDRESS=""
 ENV OPSI_HOST_ID=""
 ENV OPSI_HOST_KEY=""
@@ -50,9 +52,12 @@ RUN apt-get update \
 		ca-certificates \
 		mariadb-client \
 	&& echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] ${OPSI_REPO} /" > /etc/apt/sources.list.d/opsi.list \
+	# remove OLD_OPSI_REPO once all components are published in 4.3
+	&& echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs-old.gpg] ${OLD_OPSI_REPO} /" >> /etc/apt/sources.list.d/opsi.list \
 	&& mkdir /usr/local/share/keyrings \
 	&& chmod 755 /usr/local/share/keyrings \
 	&& wget -nv ${OPSI_REPO}Release.key -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs.gpg \
+	&& wget -nv ${OLD_OPSI_REPO}Release.key -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs-old.gpg \
 	&& apt-get --yes update \
 	&& OPSI_HOST_ID="opsiconfd.opsi.org" apt-get --yes install --no-install-recommends opsi-server-expert \
 	&& sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
@@ -60,7 +65,7 @@ RUN apt-get update \
 	&& ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime && echo "${TZ}" > /etc/timezone \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& rm /etc/opsi/ssl/*
+	&& rm -f /etc/opsi/ssl/*
 
 COPY files/ /
 
