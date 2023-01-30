@@ -25,6 +25,17 @@ function set_timezone {
 }
 
 
+function set_host_id {
+	if [ -n $OPSI_HOST_ID ]; then
+		sed -i -e "s/^id = \"[^\"]*\"/id = \"$OPSI_HOST_ID\"/" /etc/opsi/opsi.conf
+	else
+		if [ -n $OPSI_HOSTNAME ]; then
+			sed -i -e "s/^id = \"[^\"]*\"/id = \"$OPSI_HOSTNAME\"/" /etc/opsi/opsi.conf
+		fi
+	fi
+}
+
+
 function backend_config_configserver {
 	echo "* Configure backend for configserver" 1>&2
 	cat > /etc/opsi/backends/mysql.conf <<EOF
@@ -214,10 +225,10 @@ function handle_backup {
 			echo "* OPSICONFD_RESTORE_BACKUP_URL is set, but marker /etc/opsi/docker_start_backup_restored found - skipping restore."
 		else
 			echo "* Getting backup from $OPSICONFD_RESTORE_BACKUP_URL and restoring."
-			wget $OPSICONFD_RESTORE_BACKUP_URL -O /tmp/backupfile
+			wget -q $OPSICONFD_RESTORE_BACKUP_URL -O /tmp/backupfile
 			archive=$(tar -xvf /tmp/backupfile -C /tmp)
-			opsiconfd --log-level-stderr=5 restore --server-id="local" "/tmp/${archive}"
-			rm -f backupfile "/tmp/$archive"
+			opsiconfd --log-level-stderr=5 restore --server-id="backup" "/tmp/${archive}"
+			rm -f /tmp/backupfile "/tmp/$archive"
 			touch /etc/opsi/docker_start_backup_restored
 		fi
 	fi
@@ -226,6 +237,7 @@ function handle_backup {
 function entrypoint {
 	set_environment_vars
 	set_timezone
+	set_host_id
 	wait_for_redis
 	if [ "${OPSI_HOST_ROLE}" = "configserver" ]; then
 		wait_for_mysql
