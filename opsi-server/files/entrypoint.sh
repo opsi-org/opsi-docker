@@ -227,7 +227,7 @@ function handle_backup {
 			echo "* Getting backup from $OPSICONFD_RESTORE_BACKUP_URL and restoring."
 			wget -q $OPSICONFD_RESTORE_BACKUP_URL -O /tmp/backupfile
 			archive=$(tar -xvf /tmp/backupfile -C /tmp)
-			opsiconfd --log-level-stderr=5 restore --server-id="backup" "/tmp/${archive}"
+			opsiconfd --log-level-stderr=5 restore --server-id="local" "/tmp/${archive}"
 			rm -f /tmp/backupfile "/tmp/$archive"
 			touch /etc/opsi/docker_start_backup_restored
 		fi
