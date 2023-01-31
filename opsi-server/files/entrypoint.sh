@@ -28,10 +28,8 @@ function set_timezone {
 function set_host_id {
 	if [ -n $OPSI_HOST_ID ]; then
 		sed -i -e "s/^id = \"[^\"]*\"/id = \"$OPSI_HOST_ID\"/" /etc/opsi/opsi.conf
-	else
-		if [ -n $OPSI_HOSTNAME ]; then
-			sed -i -e "s/^id = \"[^\"]*\"/id = \"$OPSI_HOSTNAME\"/" /etc/opsi/opsi.conf
-		fi
+	elif  [ -n $OPSI_HOSTNAME ]; then
+		sed -i -e "s/^id = \"[^\"]*\"/id = \"$OPSI_HOSTNAME\"/" /etc/opsi/opsi.conf
 	fi
 }
 
