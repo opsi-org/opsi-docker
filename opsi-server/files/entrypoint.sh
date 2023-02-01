@@ -34,8 +34,20 @@ function set_host_id {
 }
 
 
+function backend_config_tftpboot {
+	if [[ "${OPSI_TFTPBOOT}" =~ ^(true|yes|y|1)$ ]]; then
+		sed -i 's/"enabled".*/"enabled": True,/' /etc/opsi/backends/opsipxeconfd.conf
+	else
+		sed -i 's/"enabled".*/"enabled": False,/' /etc/opsi/backends/opsipxeconfd.conf
+	fi
+}
+
+
 function backend_config_configserver {
 	echo "* Configure backend for configserver" 1>&2
+
+	sed -i 's/^server-role .*/server-role = "configserver"/' /etc/opsi/opsi.conf
+
 	cat > /etc/opsi/backends/mysql.conf <<EOF
 # -*- coding: utf-8 -*-
 
@@ -47,24 +59,14 @@ config = {
 	"password": "${MYSQL_PASSWORD}"
 }
 EOF
-
-if [[ "${OPSI_TFTPBOOT}" =~ ^(true|yes|y|1)$ ]]; then
-	cat > /etc/opsi/backendManager/dispatch.conf <<EOF
-backend_.*         : mysql, opsipxeconfd
-host_.*            : mysql, opsipxeconfd
-productOnClient_.* : mysql, opsipxeconfd
-configState_.*     : mysql, opsipxeconfd
-.*                 : mysql
-EOF
-else
-	echo ".*: mysql" > /etc/opsi/backendManager/dispatch.conf
-fi
-
 }
 
 
 function backend_config_depotserver {
 	echo "* Configure backend for depotserver" 1>&2
+
+	sed -i 's/^server-role .*/server-role = "depotserver"/' /etc/opsi/opsi.conf
+
 	cat > /etc/opsi/backends/jsonrpc.conf <<EOF
 # -*- coding: utf-8 -*-
 
@@ -75,7 +77,6 @@ config = {
 	"password": "${OPSI_HOST_KEY}"
 }
 EOF
-	echo ".*: jsonrpc" > /etc/opsi/backendManager/dispatch.conf
 }
 
 
@@ -244,6 +245,7 @@ function entrypoint {
 	set run_set_rights=false
 	init_volumes || run_set_rights=true
 
+	backend_config_tftpboot
 	if [ "${OPSI_HOST_ROLE}" = "depotserver" ]; then
 		backend_config_depotserver
 		opsiconfd setup --log-level-stderr 6
