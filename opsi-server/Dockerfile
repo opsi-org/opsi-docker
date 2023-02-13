@@ -42,6 +42,7 @@ RUN apt-get update \
 		psmisc \
 		iproute2 \
 		locales \
+		bzip2 \
 		vim \
 		git \
 		sudo \
