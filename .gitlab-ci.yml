@@ -26,6 +26,8 @@ docker_image_dockerhub:
     - ./opsi-server/opsi-server.sh publish
 
 docker_image_internal:
+  variables:
+    branch: "development"
   stage: build_and_publish
   #when: manual
 #  only:
@@ -35,7 +37,7 @@ docker_image_internal:
     - export REGISTRY="docker.uib.gmbh"
     - export REGISTRY_PATH="/opsi"
     - export OPSI_VERSION="4.3"
-    - export OPSI_BRANCH="development"
+    - export OPSI_BRANCH=$branch
     - export ADDITIONAL_TAGS="4.3"
     - ./opsi-server/opsi-server.sh build --no-cache
     - ./opsi-server/opsi-server.sh publish
