@@ -80,15 +80,6 @@ EOF
 }
 
 
-function set_default_configs {
-	echo "* Set default configs" 1>&2
-	opsi-admin -dS method config_createBool opsiclientd.global.verify_server_cert "Verify opsi server certificates" true
-	opsi-admin -dS method config_createBool opsiclientd.global.install_opsi_ca_into_os_store "Install opsi CA into os certificate store" true
-	opsi-admin -dS method config_createUnicode clientconfig.depot.protocol "Protocol for depot access" '["cifs","webdav"]' '["webdav"]'
-	opsi-admin -dS method config_createUnicode clientconfig.depot.protocol.netboot "Protocol for depot access in bootimage" '["cifs","webdav"]' '["webdav"]'
-}
-
-
 function init_volumes {
 	echo "* Init volumes" 1>&2
 	set return_val=0
@@ -252,7 +243,6 @@ function entrypoint {
 	else
 		backend_config_configserver
 		opsiconfd setup --log-level-stderr 6
-		set_default_configs
 	fi
 
 	setup_users
