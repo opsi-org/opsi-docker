@@ -50,7 +50,7 @@ RUN apt-get update \
 		supervisor \
 		ca-certificates \
 		mariadb-client \
-		screen \
+		tmux \
 		mc \
 	&& echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] ${OPSI_REPO} /" > /etc/apt/sources.list.d/opsi.list \
 	&& mkdir /usr/local/share/keyrings \
