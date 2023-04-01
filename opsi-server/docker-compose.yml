@@ -60,7 +60,7 @@ services:
       - grafana_data:/var/lib/grafana
 
   opsi-server:
-    image: docker.uib.gmbh/opsi/opsi-server:4.3-development  # uibmz/opsi-server:4.3
+    image: uibmz/opsi-server:4.3
     #build: .
     <<: *restart-policy
     depends_on:
