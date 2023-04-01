@@ -79,6 +79,7 @@ RUN mkdir /data \
 	&& echo "cd /var/lib/opsi" >> /var/lib/opsiconfd/home/.zshrc \
 	&& chown -R opsiconfd:opsiadmin /var/lib/opsiconfd/home \
 	&& chmod -R g-w,o-w /var/lib/opsiconfd/home \
+	&& chmod -R g-rww,o-rww /var/lib/opsiconfd/home/.oh-my-zsh \
 	&& echo ". /entrypoint.sh set_environment_vars" >> /root/.bashrc \
 	&& echo ". /entrypoint.sh set_environment_vars" >> /root/.zshrc \
 	&& (rm /tmp/* || true)
