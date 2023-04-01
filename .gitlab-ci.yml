@@ -21,7 +21,7 @@ docker_image_dockerhub:
     - export REGISTRY_PASSWORD="${DOCKER_HUB_ACCESS_TOKEN}"
     - export OPSI_VERSION="4.3"
     - export OPSI_BRANCH="development"
-    #- export ADDITIONAL_TAGS="4.3"
+    - export ADDITIONAL_TAGS="4.3"
     - ./opsi-server/opsi-server.sh build --no-cache
     - ./opsi-server/opsi-server.sh publish
 
@@ -38,6 +38,6 @@ docker_image_internal:
     - export REGISTRY_PATH="/opsi"
     - export OPSI_VERSION="4.3"
     - export OPSI_BRANCH=$branch
-    #- export ADDITIONAL_TAGS="4.3"
+    - export ADDITIONAL_TAGS="4.3"
     - ./opsi-server/opsi-server.sh build --no-cache
     - ./opsi-server/opsi-server.sh publish
