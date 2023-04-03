@@ -26,10 +26,19 @@ function set_timezone {
 
 
 function set_host_id {
+	cur_id=$(grep "^id *=" /etc/opsi/opsi.conf | cut -d '"' -f2)
+	new_id=$cur_id
 	if [ -n $OPSI_HOST_ID ]; then
-		sed -i -e "s/^id = \"[^\"]*\"/id = \"$OPSI_HOST_ID\"/" /etc/opsi/opsi.conf
-	elif  [ -n $OPSI_HOSTNAME ]; then
-		sed -i -e "s/^id = \"[^\"]*\"/id = \"$OPSI_HOSTNAME\"/" /etc/opsi/opsi.conf
+		new_id=$OPSI_HOST_ID
+	elif [ -n $OPSI_HOSTNAME ]; then
+		new_id=$OPSI_HOSTNAME
+	fi
+	if [ "${new_id}" != "${$cur_id}" ]; then
+		sed -i -e "s/^id = \"[^\"]*\"/id = \"$new_id\"/" /etc/opsi/opsi.conf
+		if [ "${OPSI_HOST_ROLE}" = "configserver" ]; then
+			echo "* Rename server ${$cur_id} => ${new_id}" 1>&2
+			/usr/bin/opsiconfd setup --rename-server
+		fi
 	fi
 }
 
