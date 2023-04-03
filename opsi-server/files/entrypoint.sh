@@ -33,7 +33,7 @@ function set_host_id {
 	elif [ -n $OPSI_HOSTNAME ]; then
 		new_id=$OPSI_HOSTNAME
 	fi
-	if [ "${new_id}" != "${$cur_id}" ]; then
+	if [ "${new_id}" != "${cur_id}" ]; then
 		sed -i -e "s/^id = \"[^\"]*\"/id = \"$new_id\"/" /etc/opsi/opsi.conf
 		if [ "${OPSI_HOST_ROLE}" = "configserver" ]; then
 			echo "* Rename server ${$cur_id} => ${new_id}" 1>&2
