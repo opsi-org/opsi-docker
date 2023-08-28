@@ -10,9 +10,11 @@ stages:
 
 docker_image_dockerhub:
   stage: build_and_publish
+  variables:
+    branch: "development"
   # when: manual
-  only:
-    - tags
+  #only:
+  #  - tags
   script:
     - *install_tools
     - export REGISTRY="docker.io"
@@ -20,7 +22,7 @@ docker_image_dockerhub:
     - export REGISTRY_USERNAME="uibmz"
     - export REGISTRY_PASSWORD="${DOCKER_HUB_ACCESS_TOKEN}"
     - export OPSI_VERSION="4.3"
-    - export OPSI_BRANCH="development"
+    - export OPSI_BRANCH=$branch
     - export ADDITIONAL_TAGS="4.3"
     - ./opsi-server/opsi-server.sh build --no-cache
     - ./opsi-server/opsi-server.sh publish
