@@ -58,6 +58,16 @@ function od_stop {
 }
 
 
+function od_recreate {
+	Write-Host "Remove containers"
+	Write-Host "${DOCKER_COMPOSE} down"
+	& ${DOCKER_COMPOSE} down
+	Write-Host "Create and start containers"
+	Write-Host "${DOCKER_COMPOSE} up --force-recreate -d"
+	& ${DOCKER_COMPOSE} up --force-recreate -d
+}
+
+
 function od_logs {
 	param (
 		$service
@@ -89,10 +99,7 @@ function od_upgrade {
 	if ($? -eq $false) {
 		exit 1
 	}
-	Write-Host "${DOCKER_COMPOSE} down"
-	& ${DOCKER_COMPOSE} down
-	Write-Host "${DOCKER_COMPOSE} up --force-recreate -d"
-	& ${DOCKER_COMPOSE} up --force-recreate -d
+	od_recreate
 }
 
 
@@ -180,6 +187,7 @@ function od_usage {
 	Write-Host "  start                     Start all containers."
 	Write-Host "  status                    Show running containers."
 	Write-Host "  stop                      Stop all containers."
+	Write-Host "  recreate                  Recreate all containers (needed after changing docker-compose.yml)."
 	Write-Host "  logs [service]            Attach to container logs (all logs or supplied service)."
 	Write-Host "  shell [service]           Exexute a shell in a running container (default service: ${DEFAULT_SERVICE})."
 	Write-Host "  upgrade                   Upgrade and restart all containers."
@@ -208,6 +216,9 @@ switch ($args[0]) {
 	}
 	"stop" {
 		od_stop
+	}
+	"recreate" {
+		od_recreate
 	}
 	"logs" {
 		od_logs $args[1]

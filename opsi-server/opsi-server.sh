@@ -102,6 +102,16 @@ function od_stop {
 }
 
 
+function od_recreate {
+	echo "Remove containers" 1>&2
+	echo "${DOCKER_COMPOSE} down" 1>&2
+	${DOCKER_COMPOSE} down
+	echo "Create and start containers" 1>&2
+	echo "${DOCKER_COMPOSE} up --force-recreate -d" 1>&2
+	${DOCKER_COMPOSE} up --force-recreate -d
+}
+
+
 function od_logs {
 	echo "${DOCKER_COMPOSE} logs -f $1" 1>&2
 	${DOCKER_COMPOSE} logs -f $1
@@ -121,10 +131,7 @@ function od_shell {
 function od_upgrade {
 	echo "${DOCKER_COMPOSE} pull" 1>&2
 	${DOCKER_COMPOSE} pull || exit 1
-	echo "${DOCKER_COMPOSE} down" 1>&2
-	${DOCKER_COMPOSE} down
-	echo "${DOCKER_COMPOSE} up --force-recreate -d" 1>&2
-	${DOCKER_COMPOSE} up --force-recreate -d
+	od_recreate
 }
 
 
@@ -191,6 +198,7 @@ function od_usage {
 	echo "  start                     Start all containers."
 	echo "  status                    Show running containers."
 	echo "  stop                      Stop all containers."
+	echo "  recreate                  Recreate all containers (needed after changing docker-compose.yml)."
 	echo "  logs [service]            Attach to container logs (all logs or supplied service)."
 	echo "  shell [service]           Exexute a shell in a running container (default service: ${DEFAULT_SERVICE})."
 	echo "  upgrade                   Upgrade and restart all containers."
@@ -221,6 +229,9 @@ case $1 in
 	;;
 	"stop")
 		od_stop
+	;;
+	"recreate")
+		od_recreate
 	;;
 	"logs")
 		od_logs $2
