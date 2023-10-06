@@ -12,9 +12,9 @@ docker_image_dockerhub:
   stage: build_and_publish
   variables:
     branch: "development"
-  # when: manual
-  only:
-    - tags
+  #when: manual
+  #only:
+  #  - tags
   script:
     - *install_tools
     - export REGISTRY="docker.io"
@@ -30,9 +30,10 @@ docker_image_dockerhub:
 docker_image_internal:
   variables:
     branch: "development"
+  stage: build_and_publish
   #when: manual
-  only:
-    - tags
+  #only:
+  #  - tags
   script:
     - *install_tools
     - export REGISTRY="docker.uib.gmbh"
