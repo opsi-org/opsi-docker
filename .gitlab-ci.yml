@@ -14,8 +14,10 @@ triggered_from_parent:
   script:
     - echo triggered_from_parent
 
-build_and_publish:docker_image_dockerhub:testing:
+docker_image_dockerhub:
   stage: build_and_publish
+  variables:
+    branch: "development"
   # when: manual
   only:
     - tags
@@ -26,13 +28,14 @@ build_and_publish:docker_image_dockerhub:testing:
     - export REGISTRY_USERNAME="uibmz"
     - export REGISTRY_PASSWORD="${DOCKER_HUB_ACCESS_TOKEN}"
     - export OPSI_VERSION="4.2"
-    - export OPSI_BRANCH="testing"
+    - export OPSI_BRANCH=$branch
     - export ADDITIONAL_TAGS="4.2"
     - ./opsi-server/opsi-server.sh build --no-cache
     - ./opsi-server/opsi-server.sh publish
 
-build_and_publish:docker_image_internal:testing:
-  stage: build_and_publish
+docker_image_internal:
+  variables:
+    branch: "development"
   #when: manual
   only:
     - tags
@@ -41,7 +44,7 @@ build_and_publish:docker_image_internal:testing:
     - export REGISTRY="docker.uib.gmbh"
     - export REGISTRY_PATH="/opsi"
     - export OPSI_VERSION="4.2"
-    - export OPSI_BRANCH="testing"
+    - export OPSI_BRANCH=$branch
     - export ADDITIONAL_TAGS="4.2"
     - ./opsi-server/opsi-server.sh build --no-cache
     - ./opsi-server/opsi-server.sh publish
