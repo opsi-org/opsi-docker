@@ -7,8 +7,8 @@ DEFAULT_SERVICE="opsi-server"
 [ -z $REGISTRY_PATH ] && REGISTRY_PATH=""
 [ -z $REGISTRY_USERNAME ] && REGISTRY_USERNAME=""
 [ -z $REGISTRY_PASSWORD ] && REGISTRY_PASSWORD=""
-[ -z $OPSI_VERSION ] && OPSI_VERSION="4.2"
-[ -z $OPSI_BRANCH ] && OPSI_BRANCH="testing"
+[ -z $OPSI_VERSION ] && OPSI_VERSION="4.3"
+[ -z $OPSI_BRANCH ] && OPSI_BRANCH="development"
 [ -z $COMPOSE_URL ] && COMPOSE_URL="https://raw.githubusercontent.com/opsi-org/opsi-docker/main/opsi-server/docker-compose.yml"
 [ -z $ADDITIONAL_TAGS ] && ADDITIONAL_TAGS=""
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
@@ -42,9 +42,10 @@ function od_publish {
 	echo "Publish ${IMAGE_NAME}:${IMAGE_TAG} in '${prefix}'" 1>&2
 
 	set -e
-	[ -z ${auth} ] || docker login ${REGISTRY} ${auth} <<< "${REGISTRY_PASSWORD}"
+	[ -z "${auth}" ] || docker login ${REGISTRY} ${auth} <<< "${REGISTRY_PASSWORD}"
 
 	opsiconfd_version=$(docker run -e OPSI_HOSTNAME=opsiconfd.opsi.org --entrypoint /usr/bin/opsiconfd "${IMAGE_NAME}:${IMAGE_TAG}" --version | cut -d' ' -f1)
+	[ "$CI_COMMIT_TAG" = "" ] && opsiconfd_version="${opsiconfd_version}-$CI_JOB_ID"
 
 	for tag in ${IMAGE_TAG} ${opsiconfd_version} ${ADDITIONAL_TAGS}; do
 		echo docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${tag}"

@@ -5,8 +5,8 @@ FROM debian:${DEBIAN_VERSION}
 LABEL maintainer="uib GmbH <info@uib.de>"
 
 ARG DEBIAN_VERSION=11
-ARG OPSI_VERSION=4.2
-ARG OPSI_BRANCH=testing
+ARG OPSI_VERSION=4.3
+ARG OPSI_BRANCH=development
 
 ENV OPSI_REPO="https://download.opensuse.org/repositories/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
 ENV OPSI_SERVICE_ADDRESS=""
@@ -40,6 +40,7 @@ RUN apt-get update \
 		psmisc \
 		iproute2 \
 		locales \
+		bzip2 \
 		vim \
 		git \
 		sudo \
@@ -49,18 +50,20 @@ RUN apt-get update \
 		supervisor \
 		ca-certificates \
 		mariadb-client \
+		tmux \
+		mc \
 	&& echo "deb [signed-by=/usr/local/share/keyrings/opsi-obs.gpg] ${OPSI_REPO} /" > /etc/apt/sources.list.d/opsi.list \
 	&& mkdir /usr/local/share/keyrings \
 	&& chmod 755 /usr/local/share/keyrings \
-	&& wget -nv ${OPSI_REPO}Release.key -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs.gpg \
+	&& wget -nv "${OPSI_REPO}Release.key" -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs.gpg \
 	&& apt-get --yes update \
-	&& OPSI_HOST_ID="opsiconfd.opsi.org" apt-get --yes install --no-install-recommends opsi-server-expert \
+	&& OPSI_HOST_ID="opsiconfd.opsi.org" apt-get --yes install --no-install-recommends opsi-server-expert opsi-webgui \
 	&& sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
 	&& locale-gen \
 	&& ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime && echo "${TZ}" > /etc/timezone \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& rm /etc/opsi/ssl/*
+	&& rm -f /etc/opsi/ssl/*
 
 COPY files/ /
 
@@ -77,6 +80,8 @@ RUN mkdir /data \
 	&& cp -a /root/.oh-my-zsh /var/lib/opsiconfd/home/.oh-my-zsh \
 	&& echo "cd /var/lib/opsi" >> /var/lib/opsiconfd/home/.zshrc \
 	&& chown -R opsiconfd:opsiadmin /var/lib/opsiconfd/home \
+	&& chmod -R g-w,o-w /var/lib/opsiconfd/home \
+	&& chmod -R g-rww,o-rww /var/lib/opsiconfd/home/.oh-my-zsh \
 	&& echo ". /entrypoint.sh set_environment_vars" >> /root/.bashrc \
 	&& echo ". /entrypoint.sh set_environment_vars" >> /root/.zshrc \
 	&& (rm /tmp/* || true)

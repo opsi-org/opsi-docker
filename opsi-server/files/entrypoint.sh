@@ -25,8 +25,38 @@ function set_timezone {
 }
 
 
+function set_host_id {
+	cur_id=$(grep "^id *=" /etc/opsi/opsi.conf | cut -d '"' -f2)
+	new_id=$cur_id
+	if [ -n $OPSI_HOST_ID ]; then
+		new_id=$OPSI_HOST_ID
+	elif [ -n $OPSI_HOSTNAME ]; then
+		new_id=$OPSI_HOSTNAME
+	fi
+	if [ "${new_id}" != "${cur_id}" ]; then
+		sed -i -e "s/^id = \"[^\"]*\"/id = \"$new_id\"/" /etc/opsi/opsi.conf
+		if [ "${OPSI_HOST_ROLE}" = "configserver" ]; then
+			echo "* Rename server ${cur_id} => ${new_id}" 1>&2
+			/usr/bin/opsiconfd setup --rename-server
+		fi
+	fi
+}
+
+
+function backend_config_tftpboot {
+	if [[ "${OPSI_TFTPBOOT}" =~ ^(true|yes|y|1)$ ]]; then
+		sed -i 's/"enabled".*/"enabled": True,/' /etc/opsi/backends/opsipxeconfd.conf
+	else
+		sed -i 's/"enabled".*/"enabled": False,/' /etc/opsi/backends/opsipxeconfd.conf
+	fi
+}
+
+
 function backend_config_configserver {
 	echo "* Configure backend for configserver" 1>&2
+
+	sed -i 's/^server-role .*/server-role = "configserver"/' /etc/opsi/opsi.conf
+
 	cat > /etc/opsi/backends/mysql.conf <<EOF
 # -*- coding: utf-8 -*-
 
@@ -38,24 +68,14 @@ config = {
 	"password": "${MYSQL_PASSWORD}"
 }
 EOF
-
-if [[ "${OPSI_TFTPBOOT}" =~ ^(true|yes|y|1)$ ]]; then
-	cat > /etc/opsi/backendManager/dispatch.conf <<EOF
-backend_.*         : mysql, opsipxeconfd
-host_.*            : mysql, opsipxeconfd
-productOnClient_.* : mysql, opsipxeconfd
-configState_.*     : mysql, opsipxeconfd
-.*                 : mysql
-EOF
-else
-	echo ".*: mysql" > /etc/opsi/backendManager/dispatch.conf
-fi
-
 }
 
 
 function backend_config_depotserver {
 	echo "* Configure backend for depotserver" 1>&2
+
+	sed -i 's/^server-role .*/server-role = "depotserver"/' /etc/opsi/opsi.conf
+
 	cat > /etc/opsi/backends/jsonrpc.conf <<EOF
 # -*- coding: utf-8 -*-
 
@@ -66,16 +86,6 @@ config = {
 	"password": "${OPSI_HOST_KEY}"
 }
 EOF
-	echo ".*: jsonrpc" > /etc/opsi/backendManager/dispatch.conf
-}
-
-
-function set_default_configs {
-	echo "* Set default configs" 1>&2
-	opsi-admin -dS method config_createBool opsiclientd.global.verify_server_cert "Verify opsi server certificates" true
-	opsi-admin -dS method config_createBool opsiclientd.global.install_opsi_ca_into_os_store "Install opsi CA into os certificate store" true
-	opsi-admin -dS method config_createUnicode clientconfig.depot.protocol "Protocol for depot access" '["cifs","webdav"]' '["webdav"]'
-	opsi-admin -dS method config_createUnicode clientconfig.depot.protocol.netboot "Protocol for depot access in bootimage" '["cifs","webdav"]' '["webdav"]'
 }
 
 
@@ -200,10 +210,33 @@ function wait_for_redis {
 	done
 }
 
+function fetch_license_file {
+	if [ -n "$OPSILICSRV_URL" -a -n "$OPSILICSRV_TOKEN" ]; then
+		echo "* Downloading license file" 1>&2
+		mkdir -p /etc/opsi/licenses
+		wget --header="Authorization: Bearer ${OPSILICSRV_TOKEN}" "${OPSILICSRV_URL}/test?usage=opsi-docker-test" -O /etc/opsi/licenses/test.opsilic
+	fi
+}
+
+function handle_backup {
+	if [ -n "$OPSICONFD_RESTORE_BACKUP_URL" ]; then
+		if [ -e /etc/opsi/docker_start_backup_restored ]; then
+			echo "* OPSICONFD_RESTORE_BACKUP_URL is set, but marker /etc/opsi/docker_start_backup_restored found - skipping restore."
+		else
+			echo "* Getting backup from $OPSICONFD_RESTORE_BACKUP_URL and restoring."
+			wget -q $OPSICONFD_RESTORE_BACKUP_URL -O /tmp/backupfile
+			archive=$(tar -xvf /tmp/backupfile -C /tmp)
+			opsiconfd --log-level-stderr=5 restore --server-id="local" "/tmp/${archive}"
+			rm -f /tmp/backupfile "/tmp/$archive"
+			touch /etc/opsi/docker_start_backup_restored
+		fi
+	fi
+}
 
 function entrypoint {
 	set_environment_vars
 	set_timezone
+	set_host_id
 	wait_for_redis
 	if [ "${OPSI_HOST_ROLE}" = "configserver" ]; then
 		wait_for_mysql
@@ -212,13 +245,13 @@ function entrypoint {
 	set run_set_rights=false
 	init_volumes || run_set_rights=true
 
+	backend_config_tftpboot
 	if [ "${OPSI_HOST_ROLE}" = "depotserver" ]; then
 		backend_config_depotserver
-		opsiconfd setup
+		opsiconfd setup --log-level-stderr 6
 	else
 		backend_config_configserver
-		opsiconfd setup
-		set_default_configs
+		opsiconfd setup --log-level-stderr 6
 	fi
 
 	setup_users
@@ -228,6 +261,9 @@ function entrypoint {
 		echo "* Run opsi-set-rights" 1>&2
 		opsi-set-rights
 	fi
+
+	fetch_license_file
+	handle_backup
 
 	echo "* Start supervisord" 1>&2
 	exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
