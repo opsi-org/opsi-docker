@@ -8,13 +8,7 @@ stages:
   apt-get update
   apt-get --yes install docker.io
 
-triggered_from_parent:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger"
-  script:
-    - echo triggered_from_parent
-
-build_and_publish:docker_image_dockerhub:testing:
+docker_image_dockerhub:
   stage: build_and_publish
   variables:
     branch: "development"
