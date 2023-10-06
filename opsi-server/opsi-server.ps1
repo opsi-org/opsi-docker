@@ -2,7 +2,7 @@
 $PROJECT_NAME = "opsi-server"
 $DEFAULT_SERVICE = "opsi-server"
 $DOCKER_COMPOSE = "docker-compose"
-$COMPOSE_URL = "https://raw.githubusercontent.com/opsi-org/opsi-docker/opsi-server/devel/docker-compose.yml"
+$COMPOSE_URL = "https://raw.githubusercontent.com/opsi-org/opsi-docker/v4.2/opsi-server/docker-compose.yml"
 
 if ((Get-Command $DOCKER_COMPOSE -ErrorAction SilentlyContinue) -eq $null) {
 	$DOCKER_COMPOSE = "docker compose"
