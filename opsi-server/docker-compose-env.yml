@@ -34,7 +34,7 @@ services:
     env_file:
       - opsi-server.env
     <<: *restart-policy
-    command: --max_connections=${MYSQL_MAX_CONNECTION} --max_allowed_packet=${MYSQL_MAX_ALLOWED_PACKET} --sort_buffer_size=${MYSQL_SORT_BUFFER_SIZE}
+    command: --max_connections=${MYSQL_MAX_CONNECTIONS} --max_allowed_packet=${MYSQL_MAX_ALLOWED_PACKET} --sort_buffer_size=${MYSQL_SORT_BUFFER_SIZE}
     environment:
        <<: [*common-variables, *common-mysql-variables]
        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
