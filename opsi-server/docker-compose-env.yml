@@ -1,0 +1,104 @@
+version: '3.4'
+
+x-restart-policy: &restart-policy
+  restart: ${RESTART_POLICY}
+
+x-common-variables: &common-variables
+  TZ: ${TIMEZONE}
+
+x-common-mysql-variables: &common-mysql-variables
+  MYSQL_DATABASE: ${MYSQL_DATABASE}
+  MYSQL_USER: ${MYSQL_USER}
+  MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+x-common-redis-variables: &common-redis-variables
+  REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+x-common-grafana-variables: &common-grafana-variables
+  GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER}
+  GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  opsi_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+services:
+  mysql:
+    image: mariadb:10.7
+    env_file:
+      - opsi-server.env
+    <<: *restart-policy
+    command: --max_connections=${MYSQL_MAX_CONNECTIONS} --max_allowed_packet=${MYSQL_MAX_ALLOWED_PACKET} --sort_buffer_size=${MYSQL_SORT_BUFFER_SIZE}
+    environment:
+       <<: [*common-variables, *common-mysql-variables]
+       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+       MYSQL_INITDB_SKIP_TZINFO: 1
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redislabs/redistimeseries:latest
+    env_file:
+      - opsi-server.env
+    <<: *restart-policy
+    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD --loadmodule /usr/lib/redis/modules/redistimeseries.so"
+    environment:
+      <<: [*common-variables, *common-redis-variables]
+    volumes:
+      - redis_data:/data
+
+  grafana:
+    image: grafana/grafana:latest
+    env_file:
+      - opsi-server.env
+    <<: *restart-policy
+    environment:
+      <<: [*common-variables, *common-grafana-variables]
+      GF_INSTALL_PLUGINS: grafana-simple-json-datasource
+      GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s:%(http_port)s/grafana"
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  opsi-server:
+    image: uibmz/opsi-server:4.3
+    env_file:
+      - opsi-server.env
+    #build: .
+    <<: *restart-policy
+    depends_on:
+      - mysql
+      - redis
+    ports:
+      - "${OPSICONFD_PORT}:4447"
+      - "${OPSICONFD_PORT_UDP}:69/udp"
+    hostname: ${HOSTNAME}
+    domainname: ${DOMAINNAME}
+    environment:
+      <<: [*common-variables, *common-mysql-variables, *common-grafana-variables, *common-redis-variables]
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+      GRAFANA_HOST: grafana
+      OPSI_ADMIN_PASSWORD: ${OPSI_ADMIN_PASSWORD}
+      OPSI_ROOT_PASSWORD: ${OPSI_ROOT_PASSWORD}
+      # configserver / depotserver
+      OPSI_HOST_ROLE: ${OPSI_HOST_ROLE}
+      # Run tftp server and opsipxeconfd? ("true"/"false")
+      OPSI_TFTPBOOT: "${OPSI_TFTPBOOT}"
+      # OPSI_SERVICE_ADDRESS and OPSI_HOST_KEY is needed for depotserver role only
+      OPSI_SERVICE_ADDRESS: ${OPSI_SERVICE_ADDRESS}
+      OPSI_HOST_KEY: ${OPSI_HOST_KEY}
+      # opsconfd config
+      OPSICONFD_GRAFANA_EXTERNAL_URL: ${OPSICONFD_GRAFANA_EXTERNAL_URL}
+      OPSICONFD_LOG_LEVEL: ${OPSICONFD_LOG_LEVEL}
+      OPSICONFD_LOG_LEVEL_FILE: ${OPSICONFD_LOG_LEVEL_FILE}
+      OPSICONFD_RESTORE_BACKUP_URL: ${OPSICONFD_RESTORE_BACKUP_URL}
+      OPSILICSRV_URL: ${OPSILICSRV_URL}
+      OPSILICSRV_TOKEN: ${OPSILICSRV_TOKEN}
+    volumes:
+      - opsi_data:/data
