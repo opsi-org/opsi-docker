@@ -222,10 +222,10 @@ function fetch_license_file {
 
 function handle_backup {
 	if [ -n "$OPSICONFD_RESTORE_BACKUP_URL" ]; then
-		if [ -e /etc/opsi/docker_start_backup_restored ]; then
+		if [ -e /etc/opsi/docker_start_backup_restored ] && [[ ! "${OPSICONFD_RESTORE_BACKUP_ALWAYS}" =~ ^(true|yes|y|1)$ ]]; then
 			echo "* OPSICONFD_RESTORE_BACKUP_URL is set, but marker /etc/opsi/docker_start_backup_restored found - skipping restore."
 		else
-			echo "* Getting backup from $OPSICONFD_RESTORE_BACKUP_URL and restoring."
+			echo "* Getting backup from $OPSICONFD_RESTORE_BACKUP_URL and restoring (always=${OPSICONFD_RESTORE_BACKUP_ALWAYS})."
 			backupfile="/tmp/$(basename $OPSICONFD_RESTORE_BACKUP_URL)"
 			wget -q $OPSICONFD_RESTORE_BACKUP_URL -O "${backupfile}"
 			if [[ "${backupfile}" == *.tar ]] || [[ "${backupfile}" == *.tar.* ]]; then
