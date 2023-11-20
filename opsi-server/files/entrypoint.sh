@@ -224,10 +224,15 @@ function handle_backup {
 			echo "* OPSICONFD_RESTORE_BACKUP_URL is set, but marker /etc/opsi/docker_start_backup_restored found - skipping restore."
 		else
 			echo "* Getting backup from $OPSICONFD_RESTORE_BACKUP_URL and restoring."
-			wget -q $OPSICONFD_RESTORE_BACKUP_URL -O /tmp/backupfile
-			archive=$(tar -xvf /tmp/backupfile -C /tmp)
-			opsiconfd --log-level-stderr=5 restore --server-id="local" "/tmp/${archive}"
-			rm -f /tmp/backupfile "/tmp/$archive"
+			backupfile="/tmp/$(basename $OPSICONFD_RESTORE_BACKUP_URL)"
+			wget -q $OPSICONFD_RESTORE_BACKUP_URL -O "${backupfile}"
+			if [[ "${backupfile}" == *.tar ]] || [[ "${backupfile}" == *.tar.* ]]; then
+				archive="${backupfile}"
+				backupfile="$(tar -xvf "${archive}" -C /tmp)"
+				rm -f "${archive}"
+			fi
+			opsiconfd --log-level-stderr=5 restore --server-id="local" "${backupfile}"
+			rm -f "${backupfile}"
 			touch /etc/opsi/docker_start_backup_restored
 		fi
 	fi
