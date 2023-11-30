@@ -49,10 +49,9 @@ function od_publish {
 	for tag in ${IMAGE_TAG} ${opsiconfd_version} ${ADDITIONAL_TAGS}; do
 		echo docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${tag}"
 		docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${tag}"
+		echo docker push "${prefix}/${IMAGE_NAME}:${tag}"
+		docker push "${prefix}/${IMAGE_NAME}:${tag}"
 	done
-
-	echo docker push -a "${prefix}/${IMAGE_NAME}"
-	docker push -a "${prefix}/${IMAGE_NAME}"
 
 	echo docker images "${prefix}/${IMAGE_NAME}"
 	docker images "${prefix}/${IMAGE_NAME}"
