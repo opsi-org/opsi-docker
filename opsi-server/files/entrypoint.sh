@@ -230,7 +230,7 @@ function handle_backup {
 			wget -q $OPSICONFD_RESTORE_BACKUP_URL -O "${backupfile}"
 			if [[ "${backupfile}" == *.tar ]] || [[ "${backupfile}" == *.tar.* ]]; then
 				archive="${backupfile}"
-				backupfile="$(tar -xvf "${archive}" -C /tmp)"
+				backupfile="/tmp/$(tar -xvf "${archive}" -C /tmp)"
 				rm -f "${archive}"
 			fi
 			opsiconfd --log-level-stderr=5 restore --server-id="local" "${backupfile}"
