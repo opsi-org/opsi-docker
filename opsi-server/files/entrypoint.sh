@@ -76,18 +76,9 @@ EOF
 function backend_config_depotserver {
 	echo "* Configure backend for depotserver" 1>&2
 
-	sed -i 's/^server-role .*/server-role = "depotserver"/' /etc/opsi/opsi.conf
-
-	cat > /etc/opsi/backends/jsonrpc.conf <<EOF
-# -*- coding: utf-8 -*-
-
-module = 'JSONRPC'
-config = {
-	"address": "${OPSI_SERVICE_ADDRESS}",
-	"username": "${OPSI_HOST_ID}",
-	"password": "${OPSI_HOST_KEY}"
-}
-EOF
+	sed -i "s#^server-role .*#server-role = \"depotserver\"#" /etc/opsi/opsi.conf
+	sed -i "s#^key .*#key = \"${OPSI_HOST_KEY}\"#" /etc/opsi/opsi.conf
+	sed -i "s#^url .*#url = \"${OPSI_SERVICE_ADDRESS}\"#" /etc/opsi/opsi.conf
 }
 
 
