@@ -32,7 +32,8 @@ ENV LANGUAGE="en_US:en"
 ENV OPSICONFD_RESTORE_BACKUP_URL=""
 ENV OPSICONFD_RESTORE_BACKUP_ALWAYS="false"
 
-RUN apt-get update \
+RUN [ -e /.dockerenv ] || (echo "/.dockerenv not found" >&2; exit 1) \
+	&& apt-get update \
 	&& apt-get --yes dist-upgrade \
 	&& apt-get --yes install --no-install-recommends \
 		apt-transport-https \
