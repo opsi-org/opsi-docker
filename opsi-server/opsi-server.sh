@@ -25,6 +25,7 @@ function od_build {
 		--build-arg OPSI_VERSION=$OPSI_VERSION \
 		--build-arg OPSI_BRANCH=$OPSI_BRANCH \
 		.
+	exit $?
 }
 
 
