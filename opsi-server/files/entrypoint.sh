@@ -234,11 +234,11 @@ function handle_backup {
 function entrypoint {
 	set_environment_vars
 	set_timezone
-	set_host_id
 	wait_for_redis
 	if [ "${OPSI_HOST_ROLE}" = "configserver" ]; then
 		wait_for_mysql
 	fi
+	set_host_id  # requires mysql to be up in case of configserver
 
 	set run_set_rights=false
 	init_volumes || run_set_rights=true
