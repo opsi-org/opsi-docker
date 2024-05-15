@@ -1,10 +1,10 @@
-ARG DEBIAN_VERSION=12
+ARG DEBIAN_VERSION=11
 
 FROM debian:${DEBIAN_VERSION}
 
 LABEL maintainer="uib GmbH <info@uib.de>"
 
-ARG DEBIAN_VERSION=12
+ARG DEBIAN_VERSION=11
 ARG OPSI_VERSION=4.3
 ARG OPSI_BRANCH=development
 
@@ -47,7 +47,7 @@ RUN apt-get update \
 		git \
 		sudo \
 		procps \
-		netcat-openbsd \
+		netcat \
 		iputils-ping \
 		supervisor \
 		ca-certificates \
