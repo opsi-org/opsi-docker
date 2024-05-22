@@ -20,7 +20,8 @@ RUN apt-get update \
 		psmisc \
 		iproute2 \
 		locales \
-		vim \
+		neovim \
+		fzf \
 		nano \
 		git \
 		bzip2 \
