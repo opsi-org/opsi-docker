@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 PROJECT_NAME="opsi-client-debian-xfce"
 IMAGE_NAME="opsi-client-debian-xfce"

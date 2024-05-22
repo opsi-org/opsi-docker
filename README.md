@@ -28,6 +28,7 @@ There are four services defined in the docker-compose.yml:
 ## Install Docker
 Install Docker or Docker Desktop for Linux, macOS or Windows.
 Open an terminal and make sure the command `docker run --rm hello-world` is working.
+Alternatively you can use podman with docker compatibility enabled see [here](https://wiki.archlinux.org/title/Podman) for more info.
 
 ## docker-compose.yml
 The docker-compose.yml is a YAML file defining services, networks and volumes.
