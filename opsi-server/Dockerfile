@@ -47,7 +47,7 @@ RUN apt-get update \
 		git \
 		sudo \
 		procps \
-		netcat \
+		netcat-openbsd \
 		iputils-ping \
 		supervisor \
 		ca-certificates \
