@@ -75,6 +75,7 @@ RUN mkdir /data \
 	&& git clone https://github.com/zsh-users/zsh-autosuggestions /root/.oh-my-zsh/custom/plugins/zsh-autosuggestions \
 	&& sed -i '1i export TERM=xterm-256color' /root/.zshrc \
 	&& sed -i s'/^plugins.*/plugins=(git zsh-autosuggestions history)/' /root/.zshrc \
+	&& echo 'alias ls="ls --color=auto"' >> /root/.zshrc \
 	&& usermod -s /usr/bin/zsh root \
 	&& mkdir -p /var/lib/opsiconfd/home \
 	&& usermod -s /usr/bin/zsh -d /var/lib/opsiconfd/home opsiconfd \
