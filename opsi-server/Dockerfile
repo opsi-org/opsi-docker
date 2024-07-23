@@ -6,7 +6,7 @@ LABEL maintainer="uib GmbH <info@uib.de>"
 
 ARG DEBIAN_VERSION=12
 ARG OPSI_VERSION=4.3
-ARG OPSI_BRANCH=development
+ARG OPSI_BRANCH=${OPSI_BRANCH}
 
 ENV OPSI_REPO="https://download.opensuse.org/repositories/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
 ENV OPSI_SERVICE_ADDRESS=""
