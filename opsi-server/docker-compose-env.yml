@@ -60,7 +60,7 @@ services:
     <<: *restart-policy
     environment:
       <<: [*common-variables, *common-grafana-variables]
-      GF_INSTALL_PLUGINS: grafana-simple-json-datasource
+      GF_INSTALL_PLUGINS: simpod-json-datasource
       GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s:%(http_port)s/grafana"
     volumes:
       - grafana_data:/var/lib/grafana
