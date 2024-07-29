@@ -39,11 +39,12 @@ RUN apt-get update \
 		gnupg \
 		wget \
 		zsh \
+		fzf \
 		psmisc \
 		iproute2 \
 		locales \
 		bzip2 \
-		vim \
+		neovim \
 		git \
 		sudo \
 		procps \
