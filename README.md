@@ -74,4 +74,4 @@ by setting the environment variable `OPSI_TFTPBOOT` to `"false"`.
 - Login as `adminuser` with password `<OPSI_ADMIN_PASSWORD>` as set in the docker-compose.yml.
 - Open the `Licensing`-Tab and upload your opsi license file.
 - You can use the `Terminal`-Tab to get a terminal on your server.
-- Continue reading https://docs.opsi.org/opsi-docs-de/4.2/getting-started/getting-started.html
+- Continue reading https://docs.opsi.org/opsi-docs-de/stable/first-steps/first-steps.html
