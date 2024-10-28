@@ -60,7 +60,7 @@ RUN apt-get update \
 	&& chmod 755 /usr/local/share/keyrings \
 	&& wget -nv "${OPSI_REPO}Release.key" -O- | gpg --dearmor > /usr/local/share/keyrings/opsi-obs.gpg \
 	&& apt-get --yes update \
-	&& OPSI_HOST_ID="opsiconfd.opsi.org" apt-get --yes install --no-install-recommends opsi-server-expert opsi-webgui \
+	&& OPSI_HOST_ID="opsiconfd.opsi.org" apt-get --yes install --no-install-recommends opsi-server-expert opsipxeconfd opsi-linux-bootimage opsi-tftpd-hpa opsi-webgui \
 	&& sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
 	&& locale-gen \
 	&& ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime && echo "${TZ}" > /etc/timezone \
