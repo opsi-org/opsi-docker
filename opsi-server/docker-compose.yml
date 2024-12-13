@@ -74,6 +74,7 @@ services:
     environment:
       <<: [*common-variables, *common-mysql-variables, *common-grafana-variables, *common-redis-variables]
       MYSQL_HOST: mysql
+      # MYSQL_PROPERTIES: "useSSL=true&connectionPoolMaxOverflow=20&unique_system_uuids=false"
       REDIS_HOST: redis
       GRAFANA_HOST: grafana
       OPSI_ADMIN_PASSWORD: vhahd8usaz

@@ -2,18 +2,24 @@
 
 function set_environment_vars {
 	echo "* Set environment vars" 1>&2
-	if [ -z $OPSICONFD_REDIS_INTERNAL_URL ]; then
-		if [ -z $REDIS_PASSWORD ]; then
-			export OPSICONFD_REDIS_INTERNAL_URL=redis://${REDIS_HOST};
+	if [ -z "${OPSICONFD_REDIS_INTERNAL_URL}" ]; then
+		if [ -z "${REDIS_PASSWORD}" ]; then
+			export OPSICONFD_REDIS_INTERNAL_URL="redis://${REDIS_HOST}"
 		else
-			export OPSICONFD_REDIS_INTERNAL_URL=redis://default:${REDIS_PASSWORD}@${REDIS_HOST}
+			export OPSICONFD_REDIS_INTERNAL_URL="redis://default:${REDIS_PASSWORD}@${REDIS_HOST}"
 		fi
 	fi
-	if [ -z $OPSICONFD_GRAFANA_INTERNAL_URL ]; then
-		if [ -z $GF_SECURITY_ADMIN_PASSWORD ]; then
-			export OPSICONFD_GRAFANA_INTERNAL_URL=http://${GRAFANA_HOST}:3000
+	if [ -z "${OPSICONFD_GRAFANA_INTERNAL_URL}" ]; then
+		if [ -z "${GF_SECURITY_ADMIN_PASSWORD}" ]; then
+			export OPSICONFD_GRAFANA_INTERNAL_URL="http://${GRAFANA_HOST}:3000"
 		else
-			export OPSICONFD_GRAFANA_INTERNAL_URL=http://${GF_SECURITY_ADMIN_USER}:${GF_SECURITY_ADMIN_PASSWORD}@${GRAFANA_HOST}:3000
+			export OPSICONFD_GRAFANA_INTERNAL_URL="http://${GF_SECURITY_ADMIN_USER}:${GF_SECURITY_ADMIN_PASSWORD}@${GRAFANA_HOST}:3000"
+		fi
+	fi
+	if [ -z "${OPSICONFD_MYSQL_INTERNAL_URL}" ]; then
+		export OPSICONFD_MYSQL_INTERNAL_URL="mysql://${MYSQL_USER}${MYSQL_PASSWORD}@${MYSQL_HOST}/${MYSQL_DATABASE}"
+		if [ -n "${MYSQL_PROPERTIES}" ]; then
+			export OPSICONFD_MYSQL_INTERNAL_URL="${OPSICONFD_MYSQL_INTERNAL_URL}?${MYSQL_PROPERTIES}"
 		fi
 	fi
 }
@@ -29,9 +35,9 @@ function set_host_id {
 	cur_id=$(grep "^id *=" /etc/opsi/opsi.conf | cut -d '"' -f2)
 	new_id=$cur_id
 	if [ -n "${OPSI_HOST_ID}" ]; then
-		new_id=$OPSI_HOST_ID
+		new_id="${OPSI_HOST_ID}"
 	elif [ -n "${OPSI_HOSTNAME}" ]; then
-		new_id=$OPSI_HOSTNAME
+		new_id="${OPSI_HOSTNAME}"
 	else
 		new_id="$(hostname -f)"
 	fi
@@ -59,17 +65,7 @@ function backend_config_configserver {
 
 	sed -i 's/^server-role .*/server-role = "configserver"/' /etc/opsi/opsi.conf
 
-	cat > /etc/opsi/backends/mysql.conf <<EOF
-# -*- coding: utf-8 -*-
-
-module = 'MySQL'
-config = {
-	"address": "${MYSQL_HOST}",
-	"database": "${MYSQL_DATABASE}",
-	"username": "${MYSQL_USER}",
-	"password": "${MYSQL_PASSWORD}"
-}
-EOF
+	rm -f /etc/opsi/backends/mysql.conf
 }
 
 
@@ -210,7 +206,7 @@ function wait_for_redis {
 }
 
 function fetch_license_file {
-	if [ -n "$OPSILICSRV_URL" -a -n "$OPSILICSRV_TOKEN" ]; then
+	if [ -n "${OPSILICSRV_URL}" -a -n "${OPSILICSRV_TOKEN}" ]; then
 		echo "* Downloading license file" 1>&2
 		mkdir -p /etc/opsi/licenses
 		wget --header="Authorization: Bearer ${OPSILICSRV_TOKEN}" "${OPSILICSRV_URL}/test?usage=opsi-docker-test" -O /etc/opsi/licenses/test.opsilic
@@ -218,13 +214,13 @@ function fetch_license_file {
 }
 
 function handle_backup {
-	if [ -n "$OPSICONFD_RESTORE_BACKUP_URL" ]; then
+	if [ -n "${OPSICONFD_RESTORE_BACKUP_URL}" ]; then
 		if [ -e /etc/opsi/docker_start_backup_restored ] && [[ ! "${OPSICONFD_RESTORE_BACKUP_ALWAYS}" =~ ^(true|yes|y|1)$ ]]; then
 			echo "* OPSICONFD_RESTORE_BACKUP_URL is set, but marker /etc/opsi/docker_start_backup_restored found - skipping restore."
 		else
-			echo "* Getting backup from $OPSICONFD_RESTORE_BACKUP_URL and restoring (always=${OPSICONFD_RESTORE_BACKUP_ALWAYS})."
+			echo "* Getting backup from ${OPSICONFD_RESTORE_BACKUP_URL} and restoring (always=${OPSICONFD_RESTORE_BACKUP_ALWAYS})."
 			backupfile="/tmp/$(basename $OPSICONFD_RESTORE_BACKUP_URL)"
-			wget -q $OPSICONFD_RESTORE_BACKUP_URL -O "${backupfile}"
+			wget -q "${OPSICONFD_RESTORE_BACKUP_URL}" -O "${backupfile}"
 			if [[ "${backupfile}" == *.tar ]] || [[ "${backupfile}" == *.tar.* ]]; then
 				archive="${backupfile}"
 				backupfile="/tmp/$(tar -xvf "${archive}" -C /tmp)"
