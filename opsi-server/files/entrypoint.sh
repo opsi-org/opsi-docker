@@ -115,17 +115,23 @@ function init_volumes {
 
 function setup_users {
 	echo "* Setup users" 1>&2
-	if ! getent passwd adminuser >/dev/null 2>&1; then
-		echo "Create adminuser" 1>&2
-		useradd -u 1000 -d /data/adminuser -m -g opsiadmin -G opsifileadmins -s /usr/bin/zsh adminuser || true
-		cp -a /root/.zshrc /data/adminuser/
-		chown adminuser:opsiadmin -R /data/adminuser/.zshrc
-		cp -a /root/.oh-my-zsh /data/adminuser/
-		chown -R adminuser:opsiadmin -R /data/adminuser/.oh-my-zsh
+	if [ -z "${OPSI_ADMIN_PASSWORD}" ]; then
+		if getent passwd adminuser >/dev/null 2>&1; then
+			userdel -r -f adminuser || true
+		fi
+	else
+		if ! getent passwd adminuser >/dev/null 2>&1; then
+			echo "Create adminuser" 1>&2
+			useradd -u 1000 -d /data/adminuser -m -g opsiadmin -G opsifileadmins -s /usr/bin/zsh adminuser || true
+			cp -a /root/.zshrc /data/adminuser/
+			chown adminuser:opsiadmin -R /data/adminuser/.zshrc
+			cp -a /root/.oh-my-zsh /data/adminuser/
+			chown -R adminuser:opsiadmin -R /data/adminuser/.oh-my-zsh
+		fi
+		echo "adminuser:${OPSI_ADMIN_PASSWORD}" | chpasswd
 	fi
-	echo "adminuser:${OPSI_ADMIN_PASSWORD}" | chpasswd
 
-	if [ -z $OPSI_ROOT_PASSWORD ]; then
+	if [ -z "${OPSI_ROOT_PASSWORD}" ]; then
 		passwd --lock root
 	else
 		echo "root:${OPSI_ROOT_PASSWORD}" | chpasswd
