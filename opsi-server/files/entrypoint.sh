@@ -86,7 +86,6 @@ function init_volumes {
 		dst=${dir_to_move#*:}
 		dst="/data/${dst}"
 		if [ ! -L "${src}" ]; then
-			echo "Move ${src}" 1>&2
 			set return_val=1
 			if [ -d "${src}" ]; then
 				# Moving sub directories to allow mounts below dst
@@ -94,10 +93,12 @@ function init_volumes {
 				for entry in "${src}"/*; do
 					name=$(basename $entry)
 					if [ ! -e "${dst}/${name}" ]; then
-						mv $entry "${dst}/${name}"
+						echo "Move ${$entry} to ${dst}/${name}" 1>&2
+						mv "${entry}" "${dst}/${name}"
 					fi
 				done
 			fi
+			echo "Create link ${src} -> ${dst}" 1>&2
 			rm --one-file-system -r "${src}"
 			ln -s "${dst}" "${src}"
 			chown opsiconfd:opsiadmin "${dst}"
@@ -113,7 +114,8 @@ function setup_users {
 	echo "* Setup users" 1>&2
 	if [ -z "${OPSI_ADMIN_PASSWORD}" ]; then
 		if getent passwd adminuser >/dev/null 2>&1; then
-			userdel -r -f adminuser || true
+			echo "Lock adminuser" 1>&2
+			passwd --lock adminuser
 		fi
 	else
 		if ! getent passwd adminuser >/dev/null 2>&1; then
@@ -124,12 +126,15 @@ function setup_users {
 			cp -a /root/.oh-my-zsh /data/adminuser/
 			chown -R adminuser:opsiadmin -R /data/adminuser/.oh-my-zsh
 		fi
+		echo "Set adminuser password" 1>&2
 		echo "adminuser:${OPSI_ADMIN_PASSWORD}" | chpasswd
 	fi
 
 	if [ -z "${OPSI_ROOT_PASSWORD}" ]; then
+		echo "Lock root" 1>&2
 		passwd --lock root
 	else
+		echo "Set root password" 1>&2
 		echo "root:${OPSI_ROOT_PASSWORD}" | chpasswd
 	fi
 }
