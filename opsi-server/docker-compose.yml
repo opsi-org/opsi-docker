@@ -60,7 +60,7 @@ services:
       - grafana_data:/var/lib/grafana
 
   opsi-server:
-    image: uibmz/opsi-server:4.3
+    image: uibmz/opsi-server:4.3-development
     #build: .
     <<: *restart-policy
     depends_on:
@@ -89,7 +89,7 @@ services:
       # opsconfd config
       OPSICONFD_GRAFANA_EXTERNAL_URL: /grafana
       OPSICONFD_LOG_LEVEL: 6
-      OPSICONFD_LOG_LEVEL_FILE: 4
+      OPSICONFD_LOG_LEVEL_FILE: 6
       OPSICONFD_RESTORE_BACKUP_URL: ${OPSICONFD_RESTORE_BACKUP_URL:-}
       OPSILICSRV_URL: ${OPSILICSRV_URL:-}
       OPSILICSRV_TOKEN: ${OPSILICSRV_TOKEN:-}

@@ -93,7 +93,7 @@ function init_volumes {
 				for entry in "${src}"/*; do
 					name=$(basename $entry)
 					if [ ! -e "${dst}/${name}" ]; then
-						echo "Move ${$entry} to ${dst}/${name}" 1>&2
+						echo "Move ${entry} to ${dst}/${name}" 1>&2
 						mv "${entry}" "${dst}/${name}"
 					fi
 				done
