@@ -11,17 +11,22 @@ DEFAULT_SERVICE="opsi-server"
 [ -z $OPSI_BRANCH ] && OPSI_BRANCH="stable"
 [ -z $COMPOSE_URL ] && COMPOSE_URL="https://raw.githubusercontent.com/opsi-org/opsi-docker/main/opsi-server/docker-compose.yml"
 [ -z $ADDITIONAL_TAGS ] && ADDITIONAL_TAGS=""
+[ -z $ARCH ] && ARCH=$(uname -m)
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
+REGISTRY_PREFIX="${REGISTRY}"
+[ -z $REGISTRY_PREFIX ] || REGISTRY_PREFIX="${REGISTRY_PREFIX}/"
+REGISTRY_PREFIX="${REGISTRY_PREFIX}${REGISTRY_PATH##*/}"
 
 DOCKER_COMPOSE="docker-compose"
 which $DOCKER_COMPOSE >/dev/null || DOCKER_COMPOSE="docker compose"
 
 cd $(dirname "${BASH_SOURCE[0]}")
 
+
 function od_build {
-	echo "Build ${IMAGE_NAME}:${IMAGE_TAG}" 1>&2
+	echo "Build ${IMAGE_NAME}:${IMAGE_TAG}-${ARCH}" 1>&2
 	docker build $1 \
-		--tag "${IMAGE_NAME}:${IMAGE_TAG}" \
+		--tag "${REGISTRY_PREFIX}/${IMAGE_NAME}:${IMAGE_TAG}-${ARCH}" \
 		--build-arg OPSI_VERSION=$OPSI_VERSION \
 		--build-arg OPSI_BRANCH=$OPSI_BRANCH \
 		.
@@ -29,33 +34,73 @@ function od_build {
 }
 
 
-function od_publish {
-	prefix="${REGISTRY}"
-	[ -z $prefix ] || prefix="${prefix}/"
-	prefix="${prefix}${REGISTRY_PATH##*/}"
-
+function od_registry_login {
 	auth=""
 	if [ ! -z $REGISTRY_USERNAME ]; then
 		auth="${auth} --username ${REGISTRY_USERNAME}"
 		[ -z $REGISTRY_PASSWORD ] || auth="${auth} --password-stdin"
 	fi
-
-	echo "Publish ${IMAGE_NAME}:${IMAGE_TAG} in '${prefix}'" 1>&2
-
-	set -e
 	[ -z "${auth}" ] || docker login ${REGISTRY} ${auth} <<< "${REGISTRY_PASSWORD}"
+}
+
+
+function od_push_arch {
+	set -e  # exit on error
+
+	od_registry_login
+
+	for arch in ${ARCH//,/ }; do
+		echo "Push ${IMAGE_NAME}:${IMAGE_TAG}-${arch} to '${REGISTRY_PREFIX}'" 1>&2
+		echo docker push "${REGISTRY_PREFIX}/${IMAGE_NAME}:${IMAGE_TAG}-${arch}" 1>&2
+		docker push "${REGISTRY_PREFIX}/${IMAGE_NAME}:${IMAGE_TAG}-${arch}"
+	done
+}
+
+
+function od_push_tags {
+	echo "Push tags for ${IMAGE_NAME}:${IMAGE_TAG} for architectures ${ARCH} to '${REGISTRY_PREFIX}'" 1>&2
+	set -e  # exit on error
+
+	od_registry_login
+
+	arch_tags=""
+	opsiconfd_version=""
+	for arch in ${ARCH//,/ }; do
+		arch_tags="${arch_tags} ${REGISTRY_PREFIX}/${IMAGE_NAME}:${IMAGE_TAG}-${arch}"
+		if [ -z "${opsiconfd_version}" ]; then
+			opsiconfd_version=$(docker run -e OPSI_HOSTNAME=opsiconfd.opsi.org --entrypoint /usr/bin/opsiconfd "${REGISTRY_PREFIX}/${IMAGE_NAME}:${IMAGE_TAG}-${arch}" --version | cut -d' ' -f1)
+		fi
+	done
+
+	for tag in ${IMAGE_TAG} ${opsiconfd_version} ${ADDITIONAL_TAGS}; do
+		echo docker manifest create --amend "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tag}" ${arch_tags} 1>&2
+		docker manifest create --amend "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tag}" ${arch_tags}
+		echo docker manifest push --purge "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tag}" 1>&2
+		docker manifest push --purge "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tag}"
+	done
+
+	echo docker images "${REGISTRY_PREFIX}/${IMAGE_NAME}" 1>&2
+	docker images "${REGISTRY_PREFIX}/${IMAGE_NAME}"
+}
+
+
+function od_publish {
+	echo "Publish ${IMAGE_NAME}:${IMAGE_TAG} in '${REGISTRY_PREFIX}'" 1>&2
+	set -e  # exit on error
+
+	od_registry_login
 
 	opsiconfd_version=$(docker run -e OPSI_HOSTNAME=opsiconfd.opsi.org --entrypoint /usr/bin/opsiconfd "${IMAGE_NAME}:${IMAGE_TAG}" --version | cut -d' ' -f1)
 
 	for tag in ${IMAGE_TAG} ${opsiconfd_version} ${ADDITIONAL_TAGS}; do
-		echo docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${tag}"
-		docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${prefix}/${IMAGE_NAME}:${tag}"
-		echo docker push "${prefix}/${IMAGE_NAME}:${tag}"
-		docker push "${prefix}/${IMAGE_NAME}:${tag}"
+		echo docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tag}" 1>&2
+		docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tag}"
+		echo docker push "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tag}" 1>&2
+		docker push "${REGISTRY_PREFIX}/${IMAGE_NAME}:${tag}"
 	done
 
-	echo docker images "${prefix}/${IMAGE_NAME}"
-	docker images "${prefix}/${IMAGE_NAME}"
+	echo docker images "${REGISTRY_PREFIX}/${IMAGE_NAME}" 1>&2
+	docker images "${REGISTRY_PREFIX}/${IMAGE_NAME}"
 }
 
 
@@ -89,7 +134,7 @@ function od_start {
 
 
 function od_status {
-	echo "${DOCKER_COMPOSE} ps"
+	echo "${DOCKER_COMPOSE} ps" 1>&2
 	${DOCKER_COMPOSE} ps
 }
 
@@ -208,6 +253,8 @@ function od_usage {
 	echo "  export-images             Export images as archive."
 	echo "  import-images [archive]   Import images from archive."
 	echo "  build [--no-cache]        Build ${IMAGE_NAME} image. Use --no-cache to build without cache."
+	echo "  push-arch                 Push architecture specific ${IMAGE_NAME} image to registry."
+	echo "  push-tags                 Push tags for ${IMAGE_NAME} image to registry."
 	echo "  publish                   Publish ${IMAGE_NAME} image."
 	echo ""
 }
@@ -261,6 +308,12 @@ case $1 in
 	;;
 	"build")
 		od_build $2
+	;;
+	"push-arch")
+		od_push_arch
+	;;
+	"push-tags")
+		od_push_tags
 	;;
 	"publish")
 		od_publish

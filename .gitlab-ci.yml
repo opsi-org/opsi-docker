@@ -1,39 +1,90 @@
 image: debian:bullseye
 
 stages:
-  - build_and_publish
+  - build
+  - manifest
+  - publish
 
 .install_tools: &install_tools |
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
   apt-get --yes install docker.io
 
-docker_image_dockerhub:
-  stage: build_and_publish
+build_docker_image_amd64:
+  stage: build
   variables:
     branch: "development"
-  script:
-    - *install_tools
-    - export REGISTRY="docker.io"
-    - export REGISTRY_PATH="/uibmz"
-    - export REGISTRY_USERNAME="uibmz"
-    - export REGISTRY_PASSWORD="${DOCKER_HUB_ACCESS_TOKEN}"
-    - export OPSI_VERSION="4.3"
-    - export OPSI_BRANCH=$branch
-    - '[ "$OPSI_BRANCH" = "stable" ] && export ADDITIONAL_TAGS="4.3"'
-    - ./opsi-server/opsi-server.sh build --no-cache
-    - ./opsi-server/opsi-server.sh publish
-
-docker_image_internal:
-  variables:
-    branch: "development"
-  stage: build_and_publish
   script:
     - *install_tools
     - export REGISTRY="docker.uib.gmbh"
     - export REGISTRY_PATH="/opsi"
     - export OPSI_VERSION="4.3"
     - export OPSI_BRANCH=$branch
+    - export ARCH="amd64"
+    - ./opsi-server/opsi-server.sh build --no-cache
+    - ./opsi-server/opsi-server.sh push-arch
+
+build_docker_image_arm64:
+  stage: build
+  tags:
+    - linux-arm64
+  variables:
+    branch: "development"
+  script:
+    - *install_tools
+    - export REGISTRY="docker.uib.gmbh"
+    - export REGISTRY_PATH="/opsi"
+    - export OPSI_VERSION="4.3"
+    - export OPSI_BRANCH=$branch
+    - export ARCH="arm64"
     - '[ "$OPSI_BRANCH" = "stable" ] && export ADDITIONAL_TAGS="4.3"'
     - ./opsi-server/opsi-server.sh build --no-cache
-    - ./opsi-server/opsi-server.sh publish
+    - ./opsi-server/opsi-server.sh push-arch
+
+manifest_internal:
+  stage: manifest
+  variables:
+    branch: "development"
+  script:
+    - *install_tools
+    - export REGISTRY="docker.uib.gmbh"
+    - export REGISTRY_PATH="/opsi"
+    - export OPSI_VERSION="4.3"
+    - export OPSI_BRANCH=$branch
+    - export ARCH="amd64,arm64"
+    - docker pull ${REGISTRY}${REGISTRY_PATH}/opsi-server:${OPSI_VERSION}-${OPSI_BRANCH}-amd64
+    - docker pull ${REGISTRY}${REGISTRY_PATH}/opsi-server:${OPSI_VERSION}-${OPSI_BRANCH}-arm64
+    - '[ "$OPSI_BRANCH" = "stable" ] && export ADDITIONAL_TAGS="4.3"'
+    - ./opsi-server/opsi-server.sh push-tags
+
+publish_dockerhub:
+  stage: publish
+  variables:
+    branch: "development"
+  script:
+    - *install_tools
+    - export REGISTRY="docker.uib.gmbh"
+    - export REGISTRY_PATH="/opsi"
+    - export OPSI_VERSION="4.3"
+    - export OPSI_BRANCH=$branch
+    - export ARCH="amd64,arm64"
+
+    - source="${REGISTRY}${REGISTRY_PATH}/opsi-server:${OPSI_VERSION}-${OPSI_BRANCH}"
+    - echo $source
+    - docker pull ${source}-amd64
+    - docker pull ${source}-arm64
+
+    - export REGISTRY="docker.io"
+    - export REGISTRY_PATH="/uibmz"
+    - export REGISTRY_USERNAME="uibmz"
+    - export REGISTRY_PASSWORD="${DOCKER_HUB_ACCESS_TOKEN}"
+
+    - target="${REGISTRY}${REGISTRY_PATH}/opsi-server:${OPSI_VERSION}-${OPSI_BRANCH}"
+    - echo $target
+
+    - docker tag ${source}-amd64 ${target}-amd64
+    - docker tag ${source}-arm64 ${target}-arm64
+
+    - '[ "$OPSI_BRANCH" = "stable" ] && export ADDITIONAL_TAGS="4.3"'
+    - ./opsi-server/opsi-server.sh push-arch
+    - ./opsi-server/opsi-server.sh push-tags
