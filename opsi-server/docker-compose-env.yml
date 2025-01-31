@@ -43,11 +43,11 @@ services:
       - mysql_data:/var/lib/mysql
 
   redis:
-    image: redislabs/redistimeseries:latest
+    image: redis/redis-stack-server:latest
     env_file:
       - opsi-server.env
     <<: *restart-policy
-    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD --loadmodule /usr/lib/redis/modules/redistimeseries.so"
+    command: sh -c "redis-server --requirepass \"${REDIS_PASSWORD}\" --loadmodule /opt/redis-stack/lib/redistimeseries.so"
     environment:
       <<: [*common-variables, *common-redis-variables]
     volumes:
