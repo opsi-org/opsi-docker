@@ -43,7 +43,7 @@ services:
   redis:
     image: redis/redis-stack-server:latest
     <<: *restart-policy
-    command: sh -c "redis-server --requirepass \"${REDIS_PASSWORD}\" --loadmodule /opt/redis-stack/lib/redistimeseries.so"
+    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD --loadmodule /opt/redis-stack/lib/redistimeseries.so"
     environment:
       <<: [*common-variables, *common-redis-variables]
     volumes:
