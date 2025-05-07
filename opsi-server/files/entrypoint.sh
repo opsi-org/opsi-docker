@@ -85,18 +85,33 @@ function init_volumes {
 		src=${dir_to_move%:*}
 		dst=${dir_to_move#*:}
 		dst="/data/${dst}"
-		if [ ! -L "${src}" ]; then
+		if [[ ! -L "${src}" ]]; then
 			set return_val=1
-			if [ -d "${src}" ]; then
+			if [[ "${src}" == "/tftpboot" ]]; then
+				# We need to save the grub custom file
+				# to restore it after moving the tftpboot directory
+				if [[ -e ${dst}/opsi/opsi-linux-bootimage/cfg/grub-custom.cfg ]]; then
+					cp -a ${dst}/opsi/opsi-linux-bootimage/cfg/grub-custom.cfg /tmp/grub-custom.cfg
+				fi
+				# Remove the tftpboot directory
+				echo "Remove old tftpboot directory" 1>&2
+				rm -rf "/data/tftpboot"
+			fi
+			if [[ -d "${src}" ]]; then
 				# Moving sub directories to allow mounts below dst
-				[ -e "${dst}" ] || mkdir "${dst}"
+				[[ -e "${dst}" ]] || mkdir "${dst}"
 				for entry in "${src}"/*; do
 					name=$(basename $entry)
-					if [ ! -e "${dst}/${name}" ]; then
+					if [[ ! -e "${dst}/${name}" || "${dst}" == "/data/tftpboot" ]]; then
 						echo "Move ${entry} to ${dst}/${name}" 1>&2
 						mv "${entry}" "${dst}/${name}"
 					fi
 				done
+			fi
+			if [[ -e "/tmp/grub-custom.cfg" ]]; then
+				# Restore grub custom file
+				echo "Restore grub-custom.cfg" 1>&2
+				mv /tmp/grub-custom.cfg ${dst}/opsi/opsi-linux-bootimage/cfg/grub-custom.cfg
 			fi
 			echo "Create link ${src} -> ${dst}" 1>&2
 			rm --one-file-system -r "${src}"
