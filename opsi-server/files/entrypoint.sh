@@ -81,38 +81,29 @@ function backend_config_depotserver {
 function init_volumes {
 	echo "* Init volumes" 1>&2
 	set return_val=0
-	for dir_to_move in "/etc/opsi:etc" "/var/lib/opsi:lib" "/var/log/opsi:log" "/tftpboot:tftpboot" "/var/lib/opsiconfd:opsiconfd"; do
+	for dir_to_move in "/etc/opsi:etc" "/var/lib/opsi:lib" "/var/log/opsi:log" "/tftpboot/opsi/opsi-linux-bootimage/cfg/grub-custom.cfg:grub-custom.cfg" "/var/lib/opsiconfd:opsiconfd"; do
 		src=${dir_to_move%:*}
 		dst=${dir_to_move#*:}
 		dst="/data/${dst}"
 		if [[ ! -L "${src}" ]]; then
 			set return_val=1
-			if [[ "${src}" == "/tftpboot" ]]; then
-				# We need to save the grub custom file
-				# to restore it after moving the tftpboot directory
-				if [[ -e ${dst}/opsi/opsi-linux-bootimage/cfg/grub-custom.cfg ]]; then
-					cp -a ${dst}/opsi/opsi-linux-bootimage/cfg/grub-custom.cfg /tmp/grub-custom.cfg
-				fi
-				# Remove the tftpboot directory
-				echo "Remove old tftpboot directory" 1>&2
-				rm -rf "/data/tftpboot"
-			fi
 			if [[ -d "${src}" ]]; then
 				# Moving sub directories to allow mounts below dst
 				[[ -e "${dst}" ]] || mkdir "${dst}"
 				for entry in "${src}"/*; do
 					name=$(basename $entry)
-					if [[ ! -e "${dst}/${name}" || "${dst}" == "/data/tftpboot" ]]; then
+					if [[ ! -e "${dst}/${name}" ]]; then
 						echo "Move ${entry} to ${dst}/${name}" 1>&2
 						mv "${entry}" "${dst}/${name}"
 					fi
 				done
+			else
+				if [[ ! -e "${dst}" ]]; then
+					echo "Move ${src} to ${dst}" 1>&2
+					mv "${src}" "${dst}"
+				fi
 			fi
-			if [[ -e "/tmp/grub-custom.cfg" ]]; then
-				# Restore grub custom file
-				echo "Restore grub-custom.cfg" 1>&2
-				mv /tmp/grub-custom.cfg ${dst}/opsi/opsi-linux-bootimage/cfg/grub-custom.cfg
-			fi
+			
 			echo "Create link ${src} -> ${dst}" 1>&2
 			rm --one-file-system -r "${src}"
 			ln -s "${dst}" "${src}"
@@ -120,7 +111,6 @@ function init_volumes {
 			chmod 770 "${dst}"
 		fi
 	done
-	chmod -R o+rX /data/tftpboot
 	return $return_val
 }
 
