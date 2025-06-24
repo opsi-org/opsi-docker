@@ -27,7 +27,7 @@ build_docker_image_amd64:
 build_docker_image_arm64:
   stage: build
   tags:
-    - linux-arm64
+    - docker-arm64
   variables:
     branch: "development"
   script:
