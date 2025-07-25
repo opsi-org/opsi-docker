@@ -17,7 +17,7 @@ function set_environment_vars {
 		fi
 	fi
 	if [ -z "${OPSICONFD_MYSQL_INTERNAL_URL}" ]; then
-		export OPSICONFD_MYSQL_INTERNAL_URL="mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}/${MYSQL_DATABASE}"
+		export OPSICONFD_MYSQL_INTERNAL_URL="mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}"
 		if [ -n "${MYSQL_PROPERTIES}" ]; then
 			export OPSICONFD_MYSQL_INTERNAL_URL="${OPSICONFD_MYSQL_INTERNAL_URL}?${MYSQL_PROPERTIES}"
 		fi
@@ -202,7 +202,7 @@ EOF
 
 function wait_for_mysql {
 	echo "* Waiting for MySQL" 1>&2
-	while ! nc -v -z -w3 $MYSQL_HOST 3306 >/dev/null 2>&1; do
+	while ! nc -v -z -w3 $MYSQL_HOST $MYSQL_PORT >/dev/null 2>&1; do
 		sleep 1
 	done
 }
