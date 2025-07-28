@@ -202,7 +202,12 @@ EOF
 
 function wait_for_mysql {
 	echo "* Waiting for MySQL" 1>&2
-	while ! nc -v -z -w3 $MYSQL_HOST $MYSQL_PORT >/dev/null 2>&1; do
+	echo "Getting MySQL host and port from OPSICONFD_MYSQL_INTERNAL_URL" 1>&2
+	MYSQL_URL=$(echo $OPSICONFD_MYSQL_INTERNAL_URL | cut -d@ -f2 | cut -d/ -f1)
+	HOST=$(echo $MYSQL_URL | cut -d: -f1)
+	PORT=$(echo $MYSQL_URL | cut -d: -f2)
+	echo "MySQL host: ${HOST}, port: ${PORT}" 1>&2
+	while ! nc -v -z -w3 $HOST $PORT >/dev/null 2>&1; do
 		sleep 1
 	done
 }
