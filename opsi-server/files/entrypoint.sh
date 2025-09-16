@@ -81,7 +81,7 @@ function backend_config_depotserver {
 function init_volumes {
 	echo "* Init volumes" 1>&2
 	set return_val=0
-	for dir_to_move in "/etc/opsi:etc" "/var/lib/opsi:lib" "/var/log/opsi:log" "/tftpboot/opsi/opsi-linux-bootimage/cfg/grub-custom.cfg:grub-custom.cfg" "/var/lib/opsiconfd:opsiconfd"; do
+	for dir_to_move in "/etc/opsi:etc" "/var/lib/opsi:lib" "/var/log/opsi:log" "/var/lib/opsiconfd:opsiconfd"; do
 		src=${dir_to_move%:*}
 		dst=${dir_to_move#*:}
 		dst="/data/${dst}"
@@ -103,7 +103,7 @@ function init_volumes {
 					mv "${src}" "${dst}"
 				fi
 			fi
-			
+
 			echo "Create link ${src} -> ${dst}" 1>&2
 			rm --one-file-system -r "${src}"
 			ln -s "${dst}" "${src}"
