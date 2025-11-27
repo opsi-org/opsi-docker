@@ -41,7 +41,6 @@ RUN apt-get update \
 		gnupg \
 		wget \
 		zsh \
-		fzf \
 		psmisc \
 		iproute2 \
 		locales \
