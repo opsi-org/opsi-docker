@@ -241,7 +241,7 @@ function handle_backup {
 				backupfile="/tmp/$(tar -xvf "${archive}" -C /tmp)"
 				rm -f "${archive}"
 			fi
-			opsiconfd --log-level-stderr=5 restore --server-id="local" "${backupfile}"
+			opsiconfd --log-level-stderr=5 restore ${OPSICONFD_RESTORE_BACKUP_ARGS} "${backupfile}"
 			rm -f "${backupfile}"
 			touch /etc/opsi/docker_start_backup_restored
 		fi

@@ -33,6 +33,7 @@ ENV LANG="en_US.UTF-8"
 ENV LANGUAGE="en_US:en"
 ENV OPSICONFD_RESTORE_BACKUP_URL=""
 ENV OPSICONFD_RESTORE_BACKUP_ALWAYS="false"
+ENV OPSICONFD_RESTORE_BACKUP_ARGS="--server-id=local"
 
 RUN apt-get update \
 	&& apt-get --yes dist-upgrade \
