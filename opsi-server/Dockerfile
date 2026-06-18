@@ -1,12 +1,12 @@
-ARG DEBIAN_VERSION=12
+ARG DEBIAN_VERSION=13
 
 FROM debian:${DEBIAN_VERSION}
 
 LABEL maintainer="uib GmbH <info@uib.de>"
 
-ARG DEBIAN_VERSION=12
+ARG DEBIAN_VERSION=13
 ARG OPSI_VERSION=4.3
-ARG OPSI_BRANCH=${OPSI_BRANCH}
+ARG OPSI_BRANCH=stable
 
 ENV OPSI_REPO="https://download.opensuse.org/repositories/home:/uibmz:/opsi:/${OPSI_VERSION}:/${OPSI_BRANCH}/Debian_${DEBIAN_VERSION}/"
 ENV OPSI_SERVICE_ADDRESS=""
@@ -99,4 +99,5 @@ VOLUME /data
 
 EXPOSE 4447 69/udp
 
-ENTRYPOINT /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
