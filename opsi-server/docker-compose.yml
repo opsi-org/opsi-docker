@@ -1,5 +1,3 @@
-version: '3.4'
-
 x-restart-policy: &restart-policy
   restart: unless-stopped
 
@@ -41,9 +39,9 @@ services:
       - mysql_data:/var/lib/mysql
 
   redis:
-    image: redis/redis-stack-server:latest
+    image: redis:8.10
     <<: *restart-policy
-    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD --loadmodule /opt/redis-stack/lib/redistimeseries.so --dir /data"
+    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD --loadmodule /usr/local/lib/redis/modules/redistimeseries.so --dir /data"
     environment:
       <<: [*common-variables, *common-redis-variables]
     volumes:
