@@ -28,13 +28,14 @@ volumes:
 
 services:
   mysql:
-    image: mariadb:10.7
+    image: mariadb:12.3
     <<: *restart-policy
     command: --max_connections=1000 --max_allowed_packet=256M --sort_buffer_size=4M
     environment:
        <<: [*common-variables, *common-mysql-variables]
        MYSQL_ROOT_PASSWORD: oareaNg6Ooz4teik
        MYSQL_INITDB_SKIP_TZINFO: 1
+       MARIADB_AUTO_UPGRADE: 1
     volumes:
       - mysql_data:/var/lib/mysql
 
