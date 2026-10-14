@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM debian:13
 
 LABEL maintainer="uib GmbH <info@uib.de>"
 
@@ -27,7 +27,7 @@ RUN apt-get update \
 		bzip2 \
 		sudo \
 		procps \
-		netcat \
+		# netcat \
 		libnss3-tools \
 		iputils-ping \
 		ca-certificates \

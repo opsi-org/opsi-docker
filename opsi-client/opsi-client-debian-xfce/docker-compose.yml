@@ -5,14 +5,14 @@ volumes:
     driver: local
 
 networks:
-  default:
-    external:
-      name: docker_default
+  opsi-server_default:
+    external: true
+    name: opsi-server_default
 
 services:
   opsi-client-debian-xfce:
-    #build: .
-    image: opsi-client-debian-xfce:4.2-experimental
+    build: .
+    # image: opsi-client-debian-xfce:4.2-experimental
     volumes:
       - home:/home
     ports:
