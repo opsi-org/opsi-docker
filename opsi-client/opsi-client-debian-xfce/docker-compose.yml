@@ -1,5 +1,3 @@
-version: '3.4'
-
 volumes:
  home:
     driver: local
@@ -11,8 +9,8 @@ networks:
 
 services:
   opsi-client-debian-xfce:
-    build: .
-    # image: opsi-client-debian-xfce:4.2-experimental
+    build: .    # use for building the image locally
+    # image: opsi-client-debian-xfce:4.2-experimental   # use for pulling the remote image
     volumes:
       - home:/home
     ports:
