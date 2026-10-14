@@ -9,8 +9,8 @@ networks:
 
 services:
   opsi-client-debian-xfce:
-    build: .    # use for building the image locally
-    # image: opsi-client-debian-xfce:4.2-experimental   # use for pulling the remote image
+    # build: .    # use for building the image locally
+    image: opsi-client-debian-xfce:4.2-experimental   # use for pulling the remote image OR when the image was built with ./opsi-client.sh build before
     volumes:
       - home:/home
     ports:

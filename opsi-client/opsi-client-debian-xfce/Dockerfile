@@ -27,7 +27,7 @@ RUN apt-get update \
 		bzip2 \
 		sudo \
 		procps \
-		# netcat \
+		netcat-openbsd \
 		libnss3-tools \
 		iputils-ping \
 		ca-certificates \
