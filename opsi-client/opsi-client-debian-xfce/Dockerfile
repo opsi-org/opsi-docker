@@ -76,4 +76,4 @@ VOLUME /home
 
 EXPOSE 22 3389
 
-CMD /entrypoint.sh
+CMD ["/entrypoint.sh"]

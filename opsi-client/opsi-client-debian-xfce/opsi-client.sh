@@ -4,7 +4,7 @@ PROJECT_NAME="opsi-client-debian-xfce"
 IMAGE_NAME="opsi-client-debian-xfce"
 DEFAULT_SERVICE="opsi-client-debian-xfce"
 [ -z $REGISTRY ] && REGISTRY="docker.uib.gmbh/opsi"
-[ -z $OPSI_VERSION ] && OPSI_VERSION="4.2"
+[ -z $OPSI_VERSION ] && OPSI_VERSION="4.3"
 [ -z $OPSI_BRANCH ] && OPSI_BRANCH="experimental"
 IMAGE_TAG="${OPSI_VERSION}-${OPSI_BRANCH}"
 
