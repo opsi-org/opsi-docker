@@ -48,7 +48,7 @@ services:
       - redis_data:/data
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:13.2
     <<: *restart-policy
     environment:
       <<: [*common-variables, *common-grafana-variables]
