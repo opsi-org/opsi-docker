@@ -43,18 +43,18 @@ services:
       - mysql_data:/var/lib/mysql
 
   redis:
-    image: redis/redis-stack-server:latest
+    image: redis:8.10
     env_file:
       - opsi-server.env
     <<: *restart-policy
-    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD --loadmodule /opt/redis-stack/lib/redistimeseries.so --dir /data"
+    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD --loadmodule /usr/local/lib/redis/modules/redistimeseries.so --dir /data"
     environment:
       <<: [*common-variables, *common-redis-variables]
     volumes:
       - redis_data:/data
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:13.2
     env_file:
       - opsi-server.env
     <<: *restart-policy
@@ -95,7 +95,7 @@ services:
       # OPSI_SERVICE_ADDRESS and OPSI_HOST_KEY is needed for depotserver role only
       OPSI_SERVICE_ADDRESS: ${OPSI_SERVICE_ADDRESS}
       OPSI_HOST_KEY: ${OPSI_HOST_KEY}
-      # opsconfd config
+      # opsiconfd config
       OPSICONFD_GRAFANA_EXTERNAL_URL: ${OPSICONFD_GRAFANA_EXTERNAL_URL}
       OPSICONFD_LOG_LEVEL: ${OPSICONFD_LOG_LEVEL}
       OPSICONFD_LOG_LEVEL_FILE: ${OPSICONFD_LOG_LEVEL_FILE}

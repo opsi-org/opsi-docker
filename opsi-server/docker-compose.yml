@@ -85,7 +85,7 @@ services:
       # OPSI_SERVICE_ADDRESS and OPSI_HOST_KEY is needed for depotserver role only
       OPSI_SERVICE_ADDRESS:
       OPSI_HOST_KEY:
-      # opsconfd config
+      # opsiconfd config
       OPSICONFD_GRAFANA_EXTERNAL_URL: /grafana
       OPSICONFD_LOG_LEVEL: 6
       OPSICONFD_LOG_LEVEL_FILE: 4
